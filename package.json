@@ -1,0 +1,39 @@
+{
+  "name": "anime-track-web",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:apply-sql": "node scripts/maintenance/apply_sql_files.js",
+    "db:init-with-anime-data": "node scripts/maintenance/apply_sql_files.js database/schema.sql database/seed_anime_data.sql",
+    "db:export-anime-seed": "node scripts/maintenance/export_anime_seed.js",
+    "anime:backfill-cast": "node scripts/maintenance/backfill_anime_cast.js",
+    "anime:backfill-cast:write": "node scripts/maintenance/backfill_anime_cast.js --write"
+  },
+  "dependencies": {
+    "@heroicons/react": "^2.2.0",
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.2.4",
+    "framer-motion": "^12.34.0",
+    "mysql2": "^3.16.3",
+    "next": "^14.1.0",
+    "next-auth": "^4.24.13",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "typescript": "^5.3.3"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/node": "^20.11.5",
+    "@types/react": "^18.2.48",
+    "@types/react-dom": "^18.2.18",
+    "autoprefixer": "^10.4.17",
+    "eslint": "^8.56.0",
+    "eslint-config-next": "^14.1.0",
+    "postcss": "^8.4.33",
+    "tailwindcss": "^3.4.1"
+  }
+}

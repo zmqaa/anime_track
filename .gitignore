@@ -1,0 +1,47 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# IDE / Editor
+.vscode/
+
+# Database / Backup (个人数据不上传到 GitHub)
+/backups/
+database/*.db
+database/*.sqlite
+
+# Misc
+.DS_Store
+*.pem
+*.log
+
+# local env files (保护个人私密 API KEY 和密码)
+.env*.local
+.env
+!.env.example
+!.env.production.example
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
