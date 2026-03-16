@@ -16,6 +16,14 @@ export interface EnrichedAnimeData {
   coverUrl?: string;
 }
 
+export interface ParsedWatchInput {
+  animeTitle: string;
+  originalTitle?: string;
+  episode?: number;
+  season?: number;
+  watchedAt?: string;
+}
+
 type DeepSeekMessage = {
   role: 'system' | 'user' | 'assistant';
   content: string;
@@ -53,6 +61,31 @@ function toOptionalBoolean(value: unknown): boolean | undefined {
   return typeof value === 'boolean' ? value : undefined;
 }
 
+function toOptionalDateString(value: unknown): string | undefined {
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    return trimmed;
+  }
+
+  const parsed = new Date(trimmed);
+  if (Number.isNaN(parsed.getTime())) {
+    return undefined;
+  }
+
+  const year = parsed.getFullYear();
+  const month = String(parsed.getMonth() + 1).padStart(2, '0');
+  const day = String(parsed.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 function toStringArray(value: unknown): string[] | undefined {
   if (!Array.isArray(value)) {
     return undefined;
@@ -60,6 +93,95 @@ function toStringArray(value: unknown): string[] | undefined {
 
   const normalized = uniqueStrings(value.map((item) => (typeof item === 'string' ? item : String(item ?? ''))));
   return normalized.length > 0 ? normalized : undefined;
+}
+
+function parseChineseNumberToken(token: string): number | undefined {
+  const normalized = token.trim();
+  if (!normalized) {
+    return undefined;
+  }
+
+  if (/^\d+$/.test(normalized)) {
+    const parsed = Number(normalized);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+  }
+
+  const digitMap: Record<string, number> = {
+    '零': 0,
+    '〇': 0,
+    '一': 1,
+    '二': 2,
+    '两': 2,
+    '三': 3,
+    '四': 4,
+    '五': 5,
+    '六': 6,
+    '七': 7,
+    '八': 8,
+    '九': 9,
+  };
+
+  let value = 0;
+  let current = 0;
+
+  for (const char of normalized) {
+    if (digitMap[char] !== undefined) {
+      current = digitMap[char];
+      continue;
+    }
+
+    if (char === '十') {
+      value += (current || 1) * 10;
+      current = 0;
+      continue;
+    }
+
+    if (char === '百') {
+      value += (current || 1) * 100;
+      current = 0;
+      continue;
+    }
+
+    return undefined;
+  }
+
+  value += current;
+  return value > 0 ? value : undefined;
+}
+
+function parseWatchInputFallback(inputText: string): ParsedWatchInput | null {
+  const text = inputText.trim();
+  if (!text) {
+    return null;
+  }
+
+  const seasonToken = text.match(/第\s*([0-9一二三四五六七八九十百零两〇]+)\s*季/i)?.[1];
+  const episodeToken = text.match(/第\s*([0-9一二三四五六七八九十百零两〇]+)\s*[集话話]/i)?.[1];
+
+  const season = seasonToken ? parseChineseNumberToken(seasonToken) : undefined;
+  const episode = episodeToken ? parseChineseNumberToken(episodeToken) : undefined;
+
+  let animeTitle = text
+    .replace(/^(我)?\s*(今天|昨天|前天)?\s*(看了|补了|追了|刷了|看完了|看完|看)\s*/i, '')
+    .replace(/第\s*[0-9一二三四五六七八九十百零两〇]+\s*季/gi, '')
+    .replace(/第\s*[0-9一二三四五六七八九十百零两〇]+\s*[集话話]/gi, '')
+    .replace(/[，。,.!！?？]/g, ' ')
+    .trim();
+
+  if (!animeTitle) {
+    animeTitle = text;
+  }
+
+  animeTitle = animeTitle.replace(/\s+/g, ' ').trim();
+  if (!animeTitle) {
+    return null;
+  }
+
+  return {
+    animeTitle,
+    season,
+    episode,
+  };
 }
 
 async function requestDeepSeekJson<T>(messages: DeepSeekMessage[], temperature = 0.2): Promise<T | null> {
@@ -198,4 +320,55 @@ export async function buildVoiceActorAliases(cast: string[], existingAliases: st
     : [];
 
   return uniqueStrings([...baseAliases, ...aiAliases]);
+}
+
+export async function parseWatchInput(inputText: string): Promise<ParsedWatchInput | null> {
+  const normalizedText = inputText.trim();
+  if (!normalizedText) {
+    return null;
+  }
+
+  const payload = await requestDeepSeekJson<Record<string, unknown>>(
+    [
+      {
+        role: 'system',
+        content: '你是追番日志解析助手，只输出 JSON，不输出解释。',
+      },
+      {
+        role: 'user',
+        content: `
+请把这句话解析成追番记录：${normalizedText}
+
+输出 JSON：
+{
+  "animeTitle": "标准中文标题，必须",
+  "originalTitle": "原名，可空",
+  "season": 1,
+  "episode": 1,
+  "watchedAt": "YYYY-MM-DD，可空"
+}
+
+规则：
+1. 如果句子里有季数或集数，尽量提取成数字。
+2. 如果日期没提到，watchedAt 返回 null。
+3. 识别不出来时，animeTitle 返回 null。`,
+      },
+    ],
+    0.1
+  );
+
+  if (payload) {
+    const animeTitle = toOptionalString(payload.animeTitle) || toOptionalString(payload.title);
+    if (animeTitle) {
+      return {
+        animeTitle,
+        originalTitle: toOptionalString(payload.originalTitle),
+        season: toOptionalNumber(payload.season),
+        episode: toOptionalNumber(payload.episode),
+        watchedAt: toOptionalDateString(payload.watchedAt),
+      };
+    }
+  }
+
+  return parseWatchInputFallback(normalizedText);
 }

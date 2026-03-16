@@ -1,14 +1,26 @@
 
-export type AnimeStatus = 'watching' | 'completed' | 'dropped' | 'plan_to_watch';
+import type { AnimeStatus } from './anime-shared';
+export type { AnimeStatus };
 
 export interface AnimeRecord {
   id: number;
   title: string;
+  originalTitle?: string;
+  coverUrl?: string;
+  score?: number;
   progress: number;
   totalEpisodes?: number;
   durationMinutes?: number;
   status: AnimeStatus;
   tags?: string[];
+  originalWork?: string;
+  cast?: string[];
+  castAliases?: string[];
+  summary?: string;
+  startDate?: string;
+  endDate?: string;
+  premiereDate?: string;
+  isFinished?: boolean;
   createdAt: string;
   updatedAt: string;
 }

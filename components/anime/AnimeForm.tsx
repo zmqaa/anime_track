@@ -2,8 +2,7 @@
 
 import { fetchAnimeMetadata } from '@/lib/anime-provider';
 import { useState } from 'react';
-
-type AnimeStatus = 'watching' | 'completed' | 'dropped' | 'plan_to_watch';
+import type { AnimeStatus, AnimeFormInitialData } from '@/lib/anime-shared';
 
 const statusMap: Record<AnimeStatus, string> = {
   watching: '追番中',
@@ -14,7 +13,7 @@ const statusMap: Record<AnimeStatus, string> = {
 
 interface AnimeFormProps {
   editingId: number | null;
-  initialData: any;
+        initialData: AnimeFormInitialData;
   resetForm: () => void;
   loadItems: () => Promise<void>;
   deleteAnime: (id: number) => Promise<void>;
@@ -56,7 +55,7 @@ export default function AnimeForm({
         } else if (!silent) {
              alert('未找到相关动漫信息');
         }
-    } catch (e) {
+    } catch {
         if (!silent) alert('获取失败，请稍后再试');
     } finally {
         setIsFetchingCover(false);
@@ -68,7 +67,7 @@ export default function AnimeForm({
     if (!title) return;
 
     try {
-      const payload: any = {
+            const payload: Record<string, unknown> = {
         title,
         originalTitle,
         progress: Number(progress),
@@ -95,7 +94,7 @@ export default function AnimeForm({
           loadItems();
           resetForm();
       }
-    } catch (err) {
+        } catch {
       alert('操作失败');
     }
   };

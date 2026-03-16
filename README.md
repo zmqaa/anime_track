@@ -62,6 +62,20 @@ npm run dev
 
 访问 `http://localhost:3000`。
 
+如果你希望开发环境在样式链路异常时自动重启（例如 `_next/static/css/app/layout.css` 404 导致页面无样式），可以使用守护模式：
+
+```bash
+npm run dev:guard
+```
+
+可选环境变量：
+
+- `DEV_GUARD_PORT`：监听端口，默认 `38291`
+- `DEV_GUARD_HOST`：监听地址，默认 `0.0.0.0`
+- `DEV_GUARD_PAGE`：健康检查页面，默认 `/login`
+- `DEV_GUARD_INTERVAL_MS`：检查间隔，默认 `15000`
+- `DEV_GUARD_FAILURE_THRESHOLD`：连续失败几次后重启，默认 `2`
+
 ## 主要目录
 
 - [app](app): 页面和 API 路由
@@ -88,3 +102,30 @@ npm run dev
 - [database/seed_anime_data.sql](database/seed_anime_data.sql) 保存当前共享的动漫条目和观看历史。
 - 这份种子数据默认不包含 `users` 表，避免把账号密码哈希一起提交。
 - 当本地数据库里的动漫数据更新后，可以执行 `npm run db:export-anime-seed` 重新生成种子文件。
+
+## 批量元数据补全
+
+- 新增脚本 [scripts/maintenance/backfill_anime_metadata.js](scripts/maintenance/backfill_anime_metadata.js)，默认 `dry-run`，只补空字段，不覆盖已有手工内容。
+- 补全顺序：先走 Bangumi / Jikan，再用 DeepSeek 做兜底（未配置 `DEEPSEEK_API_KEY` 时会自动跳过 AI）。
+- 默认不会修改 `start_date` / `end_date`，适合把“观看时间”继续当作手工记录。
+
+常用命令：
+
+```bash
+# 预览将要更新的字段（不写库）
+npm run anime:backfill-metadata
+
+# 写入数据库
+npm run anime:backfill-metadata:write
+
+# 只补评分、首播、原作并关闭 AI
+node scripts/maintenance/backfill_anime_metadata.js --write --no-ai --fields=score,premiereDate,originalWork
+
+# 仅处理前 30 条，控制速率
+node scripts/maintenance/backfill_anime_metadata.js --write --limit=30 --delay=1200
+```
+
+评分来源说明：
+
+- 当前 `score` 字段优先来自 Jikan 的 MyAnimeList 评分（`anime.score`），不是 AI 生成值。
+- 如果你在表单里手工填写评分，脚本在非 `--force` 模式下不会覆盖。

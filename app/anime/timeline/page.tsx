@@ -64,7 +64,7 @@ export default function AnimeTimelinePage() {
             </h2>
 
             <div className="space-y-8">
-              {items.map((item, idx) => (
+              {items.map((item) => (
                 <div key={item.id} className="group relative">
                   {/* Dot */}
                   <div className="absolute -left-[38px] top-2 w-3 h-3 rounded-full bg-zinc-800 group-hover:bg-primary transition-colors border-2 border-zinc-950 shadow-[0_0_8px_rgba(0,0,0,1)]"></div>
@@ -100,7 +100,7 @@ export default function AnimeTimelinePage() {
       
       <footer className="text-center pt-12 pb-8">
           <p className="text-[10px] text-zinc-700 font-mono tracking-tighter italic">
-              "Every episode is a page in your story."
+                &ldquo;Every episode is a page in your story.&rdquo;
           </p>
       </footer>
     </main>

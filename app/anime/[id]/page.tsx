@@ -2,35 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeftIcon, PencilSquareIcon, TrashIcon, CalendarIcon, CheckCircleIcon, ClockIcon, PlayCircleIcon, MagnifyingGlassIcon, SparklesIcon } from '@heroicons/react/24/outline';
-import { fetchAnimeMetadata } from '@/lib/anime-provider';
-
-type AnimeStatus = 'watching' | 'completed' | 'dropped' | 'plan_to_watch';
-
-interface AnimeItem {
-  id: number;
-  title: string;
-  originalTitle?: string;
-  coverUrl?: string;
-  status: AnimeStatus;
-  score?: number;
-  progress: number;
-  totalEpisodes?: number;
-  notes?: string;
-  tags?: string[];
-  durationMinutes?: number;
-  studio?: string;
-  director?: string;
-  originalWork?: string;
-  cast?: string[];
-  summary?: string;
-  startDate?: string;
-  endDate?: string;
-  premiereDate?: string;
-  isFinished?: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
+import { ArrowLeftIcon, PencilSquareIcon, TrashIcon, CalendarIcon, CheckCircleIcon, ClockIcon, PlayCircleIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import type { AnimeStatus, AnimeDetailItem } from '@/lib/anime-shared';
 
 const statusMap: Record<AnimeStatus, string> = {
   watching: '追番中',
@@ -48,14 +21,14 @@ const statusColors: Record<AnimeStatus, string> = {
 
 export default function AnimeDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
-  const [item, setItem] = useState<AnimeItem | null>(null);
+    const [item, setItem] = useState<AnimeDetailItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   
   // Edit State
-  const [formData, setFormData] = useState<Partial<AnimeItem>>({});
-  const [isFetchingCover, setIsFetchingCover] = useState(false);
+    const [formData, setFormData] = useState<Partial<AnimeDetailItem>>({});
+    const [isAiEnriching, setIsAiEnriching] = useState(false);
 
   // Parse cast string to array for display if needed
   // In API we handle JSON parsing, so item.cast should be string[] or string depending on API return of JSON
@@ -78,16 +51,15 @@ export default function AnimeDetailPage({ params }: { params: { id: string } }) 
       .finally(() => setLoading(false));
   }, [params.id, router]);
 
-  const handleChange = (key: keyof AnimeItem, value: any) => {
+    const handleChange = (key: keyof AnimeDetailItem, value: unknown) => {
     setFormData(prev => ({ ...prev, [key]: value }));
   };
 
   const saveChanges = async () => {
     setSaving(true);
     try {
-        const payload = { ...formData };
+        const payload: Partial<AnimeDetailItem> & { tags?: string[] | string } = { ...formData };
         if (typeof payload.tags === 'string') {
-             // @ts-ignore
              payload.tags = payload.tags.split(/[,，]/).map(t => t.trim()).filter(Boolean);
         }
         
@@ -106,33 +78,39 @@ export default function AnimeDetailPage({ params }: { params: { id: string } }) 
         } else {
             alert('保存失败');
         }
-    } catch (e) {
+    } catch {
         alert('保存出错');
     } finally {
         setSaving(false);
     }
   };
   
-  const fetchCover = async () => {
-        if (!formData.title) return;
-        setIsFetchingCover(true);
-        try {
-            const metadata = await fetchAnimeMetadata(formData.title);
-            if (metadata) {
-                if (metadata.coverUrl) handleChange('coverUrl', metadata.coverUrl);
-                if (metadata.originalTitle) handleChange('originalTitle', metadata.originalTitle);
-                if (metadata.description && !formData.summary) handleChange('summary', metadata.description);
-                if (metadata.totalEpisodes && !formData.totalEpisodes) handleChange('totalEpisodes', metadata.totalEpisodes);
-                if (metadata.cast && metadata.cast.length > 0 && (!formData.cast || formData.cast.length === 0)) handleChange('cast', metadata.cast);
-            } else {
-                alert('未找到封面信息');
-            }
-        } catch (e) {
-            alert('获取失败');
-        } finally {
-            setIsFetchingCover(false);
-        }
-    };
+  const enrichAnimeInfo = async () => {
+      setIsAiEnriching(true);
+      try {
+          const res = await fetch(`/api/anime/${params.id}/enrich`, { method: 'POST' });
+          const response = await res.json().catch(() => ({}));
+
+          if (!res.ok) {
+              alert(response.error || 'AI补充失败');
+              return;
+          }
+
+          const updated = response.entry || item;
+          setItem(updated);
+          setFormData(updated);
+
+          const appliedCount = Array.isArray(response.appliedFields) ? response.appliedFields.length : 0;
+          if (appliedCount === 0) {
+              alert('没有可补充的空缺字段');
+          }
+      } catch (error) {
+          console.error(error);
+          alert('AI补充失败');
+      } finally {
+          setIsAiEnriching(false);
+      }
+  };
 
   const deleteAnime = async () => {
       if(!confirm('确定删除这部动漫记录吗？不可恢复。')) return;
@@ -168,8 +146,8 @@ export default function AnimeDetailPage({ params }: { params: { id: string } }) 
                     
                     {isEditing && (
                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                             <button type="button" onClick={fetchCover} disabled={isFetchingCover} className="px-4 py-2 bg-white text-black rounded-lg text-sm font-medium hover:bg-zinc-200">
-                                {isFetchingCover ? '获取中...' : '自动获取封面'}
+                                      <button type="button" onClick={enrichAnimeInfo} disabled={isAiEnriching} className="px-4 py-2 bg-white text-black rounded-lg text-sm font-medium hover:bg-zinc-200">
+                                          {isAiEnriching ? '补充中...' : 'AI补充信息'}
                              </button>
                          </div>
                     )}
@@ -246,15 +224,23 @@ export default function AnimeDetailPage({ params }: { params: { id: string } }) 
                          <div className="flex gap-2 shrink-0">
                              {isEditing ? (
                                  <>
+                                     <button onClick={enrichAnimeInfo} disabled={isAiEnriching} className="px-4 py-2 text-sm bg-zinc-800 hover:bg-zinc-700 rounded-lg disabled:opacity-50">
+                                         {isAiEnriching ? 'AI补充中...' : 'AI补充'}
+                                     </button>
                                      <button onClick={() => setIsEditing(false)} className="px-4 py-2 text-sm hover:bg-zinc-800 rounded-lg">取消</button>
                                      <button onClick={saveChanges} disabled={saving} className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-sm font-medium shadow-lg shadow-purple-900/20">
                                          {saving ? '保存中...' : '保存更改'}
                                      </button>
                                  </>
                              ) : (
-                                 <button onClick={() => setIsEditing(true)} className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition">
-                                     <PencilSquareIcon className="w-5 h-5" />
-                                 </button>
+                                 <>
+                                     <button onClick={enrichAnimeInfo} disabled={isAiEnriching} className="px-3 py-2 text-xs bg-zinc-800/70 border border-white/10 text-zinc-200 hover:bg-zinc-700 rounded-lg disabled:opacity-50">
+                                         {isAiEnriching ? 'AI补充中...' : 'AI补充'}
+                                     </button>
+                                     <button onClick={() => setIsEditing(true)} className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition">
+                                         <PencilSquareIcon className="w-5 h-5" />
+                                     </button>
+                                 </>
                              )}
                          </div>
                      </div>
@@ -350,26 +336,12 @@ export default function AnimeDetailPage({ params }: { params: { id: string } }) 
                  </div>
 
                  {/* Staff & Cast Info Grid */}
-                 {(item.studio || item.director || item.originalWork || (item.cast && item.cast.length > 0) || isEditing) && (
+                 {(item.originalWork || (item.cast && item.cast.length > 0) || isEditing) && (
                      <div className="bg-zinc-900/30 rounded-xl p-5 border border-white/5 space-y-4">
                          <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
                              <SparklesIcon className="w-4 h-4" /> 制作阵容
                          </h3>
                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                             <div className="space-y-1">
-                                 <span className="text-zinc-500 block text-xs">制作公司 (Studio)</span>
-                                 {isEditing ? (
-                                      <input 
-                                        value={formData.studio || ''} 
-                                        onChange={e => handleChange('studio', e.target.value)} 
-                                        className="w-full bg-zinc-950 border border-zinc-800 rounded px-2 py-1"
-                                        placeholder="京阿尼, MAPPA..."
-                                      />
-                                 ) : item.studio ? (
-                                      <span className="text-zinc-200 font-medium">{item.studio}</span> 
-                                 ) : <span className="text-zinc-600">-</span>}
-                             </div>
-                             
                              <div className="space-y-1">
                                  <span className="text-zinc-500 block text-xs">原作 (Original Work)</span>
                                  {isEditing ? (
@@ -384,18 +356,6 @@ export default function AnimeDetailPage({ params }: { params: { id: string } }) 
                                  ) : <span className="text-zinc-600">-</span>}
                              </div>
 
-                             <div className="space-y-1">
-                                 <span className="text-zinc-500 block text-xs">导演 (Director)</span>
-                                 {isEditing ? (
-                                      <input 
-                                        value={formData.director || ''} 
-                                        onChange={e => handleChange('director', e.target.value)} 
-                                        className="w-full bg-zinc-950 border border-zinc-800 rounded px-2 py-1" 
-                                      />
-                                 ) : item.director ? (
-                                      <span className="text-zinc-200 font-medium">{item.director}</span> 
-                                 ) : <span className="text-zinc-600">-</span>}
-                             </div>
                          </div>
                          
                          {/* Cast Section */}

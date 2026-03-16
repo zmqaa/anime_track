@@ -31,7 +31,7 @@ export default function RegisterPage() {
       } else {
         setError(data.error || "注册失败");
       }
-    } catch (err) {
+    } catch {
       setError("网络错误，请稍后再试");
     } finally {
       setLoading(false);

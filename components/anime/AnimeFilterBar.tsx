@@ -2,8 +2,7 @@
 
 import { ArrowsUpDownIcon, ChevronDownIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
-
-type AnimeStatus = 'watching' | 'completed' | 'dropped' | 'plan_to_watch';
+import type { AnimeStatus, AnimeSortBy } from '@/lib/anime-shared';
 
 interface AnimeFilterBarProps {
   filterStatus: AnimeStatus | 'all';
@@ -11,8 +10,8 @@ interface AnimeFilterBarProps {
     castQuery: string;
     setCastQuery: (value: string) => void;
     voiceActorSuggestions: string[];
-  sortBy: string;
-  setSortBy: (s: any) => void;
+    sortBy: AnimeSortBy;
+    setSortBy: (s: AnimeSortBy) => void;
   sortOrder: 'asc' | 'desc';
   setSortOrder: (o: 'asc' | 'desc') => void;
   itemsCount: number;
@@ -31,25 +30,51 @@ export default function AnimeFilterBar({
   itemsCount
 }: AnimeFilterBarProps) {
   const [isSortOpen, setIsSortOpen] = useState(false);
+    const statusLabels: Record<AnimeStatus | 'all', string> = {
+        all: '全部',
+        watching: '追番',
+        completed: '看完',
+        plan_to_watch: '想看',
+        dropped: '弃坑',
+    };
+
+    const sortLabels: Record<AnimeSortBy, string> = {
+        updatedAt: '修改时间',
+        createdAt: '创建时间',
+        startDate: '开始观看',
+        endDate: '看完日期',
+        score: '评分',
+        progress: '进度',
+        title: '名称',
+    };
+
+      const sortOptions: Array<{ val: AnimeSortBy; label: string }> = [
+        { val: 'updatedAt', label: '修改时间' },
+        { val: 'createdAt', label: '创建时间' },
+        { val: 'startDate', label: '开始观看' },
+        { val: 'endDate', label: '看完日期' },
+        { val: 'score', label: '评分' },
+        { val: 'progress', label: '进度' },
+        { val: 'title', label: '名称' },
+      ];
 
   return (
     <>
             <div className="flex flex-col gap-4 mb-2 animate-in fade-in slide-in-from-top-2">
                 <div className="flex flex-col xl:flex-row gap-4 items-start xl:items-center justify-between">
                     <div className="flex p-1 bg-zinc-900/50 backdrop-blur-md rounded-xl border border-white/5 shadow-inner overflow-x-auto max-w-full no-scrollbar">
-             {['all', 'watching', 'completed', 'plan_to_watch', 'dropped'].map((s) => {
+             {(['all', 'watching', 'completed', 'plan_to_watch', 'dropped'] as const).map((s) => {
                  const isActive = filterStatus === s;
-                 const labels: any = { all: '全部', watching: '追番', completed: '看完', plan_to_watch: '想看', dropped: '弃坑' };
                  const activeStyles = "bg-zinc-800 text-white shadow-md";
                  const inactiveStyles = "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50";
                  
                  return (
                      <button
                          key={s}
-                         onClick={() => setFilterStatus(s as any)}
+                         onClick={() => setFilterStatus(s)}
                          className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${isActive ? activeStyles : inactiveStyles}`}
                      >
-                         {labels[s]}
+                         {statusLabels[s]}
                      </button>
                  );
              })}
@@ -81,27 +106,17 @@ export default function AnimeFilterBar({
               >
                   <div className="flex items-center gap-2">
                       <ArrowsUpDownIcon className="w-4 h-4" />
-                      <span>{
-                          {updatedAt: '修改时间', createdAt: '创建时间', score: '评分', progress: '进度', title: '名称', startDate: '开始观看', endDate: '看完日期'}[sortBy]
-                      }</span>
+                      <span>{sortLabels[sortBy]}</span>
                   </div>
                   <ChevronDownIcon className={`w-3 h-3 transition-transform duration-300 ${isSortOpen ? 'rotate-180' : ''}`} />
               </button>
 
               <div className={`absolute right-0 top-full mt-2 w-40 bg-zinc-900 border border-white/10 rounded-xl shadow-xl overflow-hidden z-50 transition-all duration-200 origin-top-right ${isSortOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2 pointer-events-none'}`}>
                  <div className="p-1">
-                     {[
-                         { val: 'updatedAt', label: '修改时间' },
-                         { val: 'createdAt', label: '创建时间' },
-                         { val: 'startDate', label: '开始观看' },
-                         { val: 'endDate', label: '看完日期' },
-                         { val: 'score', label: '评分' },
-                         { val: 'progress', label: '进度' },
-                         { val: 'title', label: '名称' }
-                     ].map((opt) => (
+                     {sortOptions.map((opt) => (
                          <button
                              key={opt.val}
-                             onClick={() => { setSortBy(opt.val as any); setIsSortOpen(false); }}
+                             onClick={() => { setSortBy(opt.val); setIsSortOpen(false); }}
                              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between ${sortBy === opt.val ? 'bg-zinc-800 text-white font-medium' : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'}`}
                          >
                              {opt.label}

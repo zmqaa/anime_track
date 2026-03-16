@@ -4,6 +4,7 @@ import { env } from './env';
 
 // Prevent multiple pools in development
 declare global {
+  // eslint-disable-next-line no-var
   var mysqlPool: mysql.Pool | undefined;
 }
 

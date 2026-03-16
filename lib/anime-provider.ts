@@ -5,12 +5,74 @@ export interface AnimeMetadata {
     originalTitle?: string;
     score?: number;
     description?: string;
-    studio?: string;
     originalWork?: string;
     cast?: string[];
     castAliases?: string[];
-    director?: string;
     isFinished?: boolean;
+}
+
+interface BangumiImages {
+    large?: string;
+    common?: string;
+    medium?: string;
+}
+
+interface BangumiActor {
+    name?: string;
+    name_cn?: string;
+}
+
+interface BangumiCharacter {
+    actors?: BangumiActor[];
+}
+
+interface BangumiSubject {
+    id?: number | string;
+    name?: string;
+    name_cn?: string;
+    images?: BangumiImages;
+    crt?: BangumiCharacter[];
+}
+
+interface BangumiSearchResponse {
+    list?: BangumiSubject[];
+}
+
+interface JikanImageSet {
+    large_image_url?: string;
+    image_url?: string;
+}
+
+interface JikanVoiceActor {
+    language?: string;
+    person?: {
+        name?: string;
+    };
+}
+
+interface JikanCharacterEntry {
+    voice_actors?: JikanVoiceActor[];
+}
+
+interface JikanAnime {
+    mal_id?: number;
+    images?: {
+        jpg?: JikanImageSet;
+    };
+    episodes?: number;
+    synopsis?: string;
+    score?: number;
+    title_japanese?: string;
+    airing?: boolean;
+    source?: string;
+}
+
+interface JikanSearchResponse {
+    data?: JikanAnime[];
+}
+
+interface JikanCharactersResponse {
+    data?: JikanCharacterEntry[];
 }
 
 const USER_AGENT = 'PersonalAnimeWeb/1.0 (https://github.com/yourname/personal-web)';
@@ -35,20 +97,20 @@ function uniqueValues(values: Array<string | undefined | null>): string[] {
     return result;
 }
 
-function pickBangumiSubject(subjects: any[], title: string) {
-    let subject = subjects.find((item: any) => item.name_cn === title || item.name === title);
+function pickBangumiSubject(subjects: BangumiSubject[], title: string) {
+    let subject = subjects.find((item) => item.name_cn === title || item.name === title);
 
     if (!subject) {
         const hasSeasonInTitle = SEASON_PATTERN.test(title);
         if (!hasSeasonInTitle) {
-            subject = subjects.find((item: any) => {
+            subject = subjects.find((item) => {
                 const itemName = item.name_cn || item.name || '';
                 return !FOLLOW_UP_SEASON_PATTERN.test(itemName);
             });
         } else {
             const seasonQuery = title.match(SEASON_PATTERN)?.[0];
             if (seasonQuery) {
-                subject = subjects.find((item: any) => {
+                subject = subjects.find((item) => {
                     const itemName = item.name_cn || item.name || '';
                     return itemName.includes(seasonQuery);
                 });
@@ -59,7 +121,7 @@ function pickBangumiSubject(subjects: any[], title: string) {
     return subject || subjects[0] || null;
 }
 
-async function fetchBangumiSubject(title: string): Promise<any | null> {
+async function fetchBangumiSubject(title: string): Promise<BangumiSubject | null> {
     const res = await fetch(`https://api.bgm.tv/search/subject/${encodeURIComponent(title)}?type=2&responseGroup=small&max_results=5`, {
         headers: {
             'User-Agent': USER_AGENT,
@@ -70,7 +132,7 @@ async function fetchBangumiSubject(title: string): Promise<any | null> {
         return null;
     }
 
-    const data = await res.json();
+    const data = await res.json() as BangumiSearchResponse;
     if (!data?.list || !Array.isArray(data.list) || data.list.length === 0) {
         return null;
     }
@@ -90,15 +152,15 @@ async function fetchBangumiCast(subjectId: number): Promise<string[]> {
             return [];
         }
 
-        const data = await res.json();
+        const data = await res.json() as { crt?: BangumiCharacter[] };
         if (!Array.isArray(data?.crt)) {
             return [];
         }
 
         const cast = uniqueValues(
-            data.crt.flatMap((character: any) =>
+            data.crt.flatMap((character) =>
                 Array.isArray(character?.actors)
-                    ? character.actors.map((actor: any) => actor?.name_cn || actor?.name)
+                    ? character.actors.map((actor) => actor?.name_cn || actor?.name)
                     : []
             )
         );
@@ -110,13 +172,13 @@ async function fetchBangumiCast(subjectId: number): Promise<string[]> {
     }
 }
 
-async function fetchJikanSearch(title: string): Promise<any | null> {
+async function fetchJikanSearch(title: string): Promise<JikanAnime | null> {
     const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=1`);
     if (!res.ok) {
         return null;
     }
 
-    const data = await res.json();
+    const data = await res.json() as JikanSearchResponse;
     if (!Array.isArray(data?.data) || data.data.length === 0) {
         return null;
     }
@@ -131,17 +193,17 @@ async function fetchJikanCast(malId: number): Promise<string[]> {
             return [];
         }
 
-        const data = await res.json();
+        const data = await res.json() as JikanCharactersResponse;
         if (!Array.isArray(data?.data)) {
             return [];
         }
 
         const cast = uniqueValues(
-            data.data.flatMap((entry: any) => {
+            data.data.flatMap((entry) => {
                 const allVoiceActors = Array.isArray(entry?.voice_actors) ? entry.voice_actors : [];
-                const japaneseVoiceActors = allVoiceActors.filter((actor: any) => actor?.language === 'Japanese');
+                const japaneseVoiceActors = allVoiceActors.filter((actor) => actor?.language === 'Japanese');
                 const preferredActors = japaneseVoiceActors.length > 0 ? japaneseVoiceActors : allVoiceActors;
-                return preferredActors.map((actor: any) => actor?.person?.name);
+                return preferredActors.map((actor) => actor?.person?.name);
             })
         );
 
@@ -155,9 +217,9 @@ async function fetchJikanCast(malId: number): Promise<string[]> {
 export async function fetchAnimeMetadata(title: string): Promise<AnimeMetadata | null> {
     if (!title) return null;
 
-    let result: AnimeMetadata = {};
+    const result: AnimeMetadata = {};
     let found = false;
-    let bangumiSubject: any | null = null;
+    let bangumiSubject: BangumiSubject | null = null;
 
     console.log(`[AnimeProvider] Searching metadata for: ${title}`);
 
@@ -198,7 +260,7 @@ export async function fetchAnimeMetadata(title: string): Promise<AnimeMetadata |
     // Strategy 2: Jikan (MyAnimeList) - Fallback or supplementary
     // Try Jikan if we miss key info (Cover OR Episodes OR Description)
     // Always Try Jikan for episodes/summary if missing, as Bangumi simple search lacks deep data
-    if (!result.coverUrl || !result.totalEpisodes || !result.description || !result.cast || result.cast.length === 0 || !result.studio || !result.originalWork) {
+    if (!result.coverUrl || !result.totalEpisodes || !result.description || !result.cast || result.cast.length === 0 || !result.originalWork) {
         try {
             const anime = await fetchJikanSearch(title);
 
@@ -235,11 +297,6 @@ export async function fetchAnimeMetadata(title: string): Promise<AnimeMetadata |
                         result.isFinished = !anime.airing;
                     }
 
-                    // Studios
-                    if (anime.studios && anime.studios.length > 0) {
-                        result.studio = anime.studios.map((s: any) => s.name).join(',');
-                    }
-                    
                     // Original Work / Source
                     if (anime.source) {
                         result.originalWork = anime.source;

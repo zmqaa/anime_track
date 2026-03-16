@@ -1,10 +1,11 @@
 "use client";
 
 import AnimeCard from './AnimeCard';
+import type { AnimeCardItem } from '@/lib/anime-shared';
 
 interface AnimeGridProps {
-  items: any[];
-  onEdit: (item: any) => void;
+  items: AnimeCardItem[];
+  onEdit: (item: AnimeCardItem) => void;
   updateProgress: (id: number, current: number, total?: number | null) => Promise<void>;
   loading: boolean;
   isAdmin?: boolean;

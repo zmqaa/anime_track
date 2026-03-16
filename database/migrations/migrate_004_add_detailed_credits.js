@@ -8,8 +8,6 @@ async function migrate() {
     // MySQL 5.7+ supports JSON. 
     await query(`
       ALTER TABLE anime
-      ADD COLUMN IF NOT EXISTS studio VARCHAR(255),
-      ADD COLUMN IF NOT EXISTS director VARCHAR(255),
       ADD COLUMN IF NOT EXISTS original_work VARCHAR(255),
       ADD COLUMN IF NOT EXISTS cast JSON;
     `);

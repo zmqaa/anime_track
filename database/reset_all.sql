@@ -23,8 +23,6 @@ CREATE TABLE IF NOT EXISTS anime (
     start_date DATE,
     end_date DATE,
     premiere_date DATE,
-    studio VARCHAR(255),
-    director VARCHAR(255),
     original_work VARCHAR(255),
     cast JSON,
     cast_aliases JSON,

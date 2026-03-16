@@ -1,8 +1,17 @@
 import type { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcrypt';
+import type { JWT } from 'next-auth/jwt';
 
 import { query } from '@/lib/db';
+
+interface AuthUserRow {
+  id: number;
+  username: string;
+  password_hash: string;
+  name: string;
+  role: string;
+}
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -26,7 +35,7 @@ export const authOptions: NextAuthOptions = {
           };
         }
 
-        const users = await query<any[]>(
+        const users = await query<AuthUserRow[]>(
           'SELECT id, username, password_hash, name, role FROM users WHERE username = ?',
           [credentials.username]
         );
@@ -49,15 +58,16 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }: any) {
+    async jwt({ token, user }) {
+      const nextToken = token as JWT & { role?: string };
       if (user) {
-        token.role = user.role;
+        nextToken.role = (user as { role?: string }).role;
       }
-      return token;
+      return nextToken;
     },
-    async session({ session, token }: any) {
+    async session({ session, token }) {
       if (session.user) {
-        (session.user as any).role = token.role;
+        (session.user as typeof session.user & { role?: string }).role = (token as JWT & { role?: string }).role;
       }
       return session;
     },

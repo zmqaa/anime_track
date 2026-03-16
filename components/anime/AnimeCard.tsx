@@ -2,15 +2,16 @@
 
 import Link from 'next/link';
 import { CheckIcon, PlusIcon, EllipsisHorizontalIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import type { AnimeCardItem, AnimeStatus } from '@/lib/anime-shared';
 
-const statusMap: Record<string, string> = {
+const statusMap: Record<AnimeStatus, string> = {
   watching: '追番中',
   completed: '已看完',
   dropped: '已弃坑',
   plan_to_watch: '计划看',
 };
 
-const statusColors: Record<string, string> = {
+const statusColors: Record<AnimeStatus, string> = {
   watching: 'from-blue-500/10 to-blue-500/5 text-blue-400 border-blue-500/20',
   completed: 'from-emerald-500/10 to-emerald-500/5 text-emerald-400 border-emerald-500/20',
   dropped: 'from-zinc-700/10 to-zinc-700/5 text-zinc-500 border-white/5',
@@ -18,8 +19,8 @@ const statusColors: Record<string, string> = {
 };
 
 interface AnimeCardProps {
-  item: any;
-  onEdit: (item: any) => void;
+  item: AnimeCardItem;
+  onEdit: (item: AnimeCardItem) => void;
   updateProgress: (id: number, current: number, total?: number | null) => Promise<void>;
   isAdmin?: boolean;
 }

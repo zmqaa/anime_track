@@ -10,7 +10,15 @@ export interface WatchHistoryRecord {
   watchedAt: string; // ISO Date string
 }
 
-function mapRowToHistory(row: any): WatchHistoryRecord {
+interface WatchHistoryRow extends RowDataPacket {
+  id: number;
+  animeId: number;
+  animeTitle: string;
+  episode: number;
+  watchedAt: Date | string;
+}
+
+function mapRowToHistory(row: WatchHistoryRow): WatchHistoryRecord {
     return {
         id: row.id,
         animeId: row.animeId,
@@ -21,12 +29,12 @@ function mapRowToHistory(row: any): WatchHistoryRecord {
 }
 
 export async function getWatchHistory(limit = 1000): Promise<WatchHistoryRecord[]> {
-  const rows = await query<RowDataPacket[]>('SELECT * FROM watch_history ORDER BY watchedAt DESC LIMIT ?', [String(limit)]);
+  const rows = await query<WatchHistoryRow[]>('SELECT * FROM watch_history ORDER BY watchedAt DESC LIMIT ?', [String(limit)]);
   return rows.map(mapRowToHistory);
 }
 
 export async function getWatchHistorySince(since: Date, limit = 1000): Promise<WatchHistoryRecord[]> {
-  const rows = await query<RowDataPacket[]>(
+  const rows = await query<WatchHistoryRow[]>(
     'SELECT * FROM watch_history WHERE watchedAt >= ? ORDER BY watchedAt DESC LIMIT ?',
     [since, String(limit)]
   );
@@ -42,15 +50,15 @@ export async function addWatchHistory(animeId: number, animeTitle: string, episo
   
   const result = await query<ResultSetHeader>(sql, [animeId, animeTitle, episode, watchedAt]);
   
-  const newRecord = await query<RowDataPacket[]>('SELECT * FROM watch_history WHERE id = ?', [result.insertId]);
+  const newRecord = await query<WatchHistoryRow[]>('SELECT * FROM watch_history WHERE id = ?', [result.insertId]);
   return mapRowToHistory(newRecord[0]);
 }
 
-export async function addBatchWatchHistory(animeId: number, animeTitle: string, startEpisode: number, endEpisode: number): Promise<void> {
+export async function addBatchWatchHistory(animeId: number, animeTitle: string, startEpisode: number, endEpisode: number, date?: Date): Promise<void> {
     if (startEpisode > endEpisode) return;
     
-    const watchedAt = new Date();
-    const values: any[] = [];
+  const watchedAt = date || new Date();
+    const values: unknown[] = [];
     const placeholders: string[] = [];
     
     for (let ep = startEpisode; ep <= endEpisode; ep++) {

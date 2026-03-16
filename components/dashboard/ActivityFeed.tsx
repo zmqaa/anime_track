@@ -5,7 +5,7 @@ import { memo } from 'react';
 import { WatchHistoryRecord } from '@/lib/dashboard-types';
 
 export default memo(function ActivityFeed({ history }: { history: WatchHistoryRecord[] }) {
-    if (history.length === 0) return <div className="text-zinc-500 text-sm text-center py-4">暂无活动记录</div>;
+    if (history.length === 0) return <div className="text-zinc-500 text-sm text-center py-10">暂无活动记录</div>;
 
     const grouped: Record<string, WatchHistoryRecord[]> = {};
     history.slice(0, 15).forEach(item => {
@@ -15,20 +15,27 @@ export default memo(function ActivityFeed({ history }: { history: WatchHistoryRe
     });
 
     return (
-        <div className="space-y-6 relative border-l border-zinc-800 ml-3 pl-6 py-2">
+        <div className="space-y-8 relative border-l border-white/8 ml-3 pl-7 py-3">
             {Object.entries(grouped).map(([date, items]) => (
                 <div key={date} className="relative">
-                    <span className="absolute -left-[29px] top-1 w-3 h-3 bg-zinc-800 border-2 border-zinc-900 rounded-full z-10"></span>
-                    <h4 className="text-[10px] font-mono text-zinc-600 mb-3 tracking-widest">{date}</h4>
+                    <span className="absolute -left-[34px] top-1.5 w-4 h-4 bg-zinc-950 border border-emerald-300/30 rounded-full z-10 shadow-[0_0_12px_rgba(86,211,156,0.22)]">
+                        <span className="absolute inset-1 rounded-full bg-emerald-300/70" />
+                    </span>
+                    <h4 className="text-[10px] font-mono text-zinc-500 mb-4 tracking-[0.28em] uppercase">{date}</h4>
                     <div className="space-y-3">
                         {items.map(item => (
-                            <div key={item.id} className="flex items-center gap-3 group">
-                                <span className="text-xs text-zinc-400 group-hover:text-white transition-colors">
-                                    观看 <span className="font-bold text-primary/80">{item.animeTitle}</span>
-                                </span>
-                                <span className="text-[10px] font-mono text-zinc-600 bg-zinc-900/50 px-1.5 py-0.5 rounded border border-white/5">
-                                    EP {item.episode}
-                                </span>
+                            <div key={item.id} className="group rounded-[22px] border border-white/5 bg-white/[0.02] px-4 py-3 hover:border-emerald-300/20 hover:bg-white/[0.04] transition-all duration-300">
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="min-w-0">
+                                        <div className="text-[11px] uppercase tracking-[0.24em] text-zinc-600">Watch Log</div>
+                                        <span className="mt-1 block text-sm text-zinc-300 group-hover:text-white transition-colors truncate">
+                                            观看 <span className="font-semibold text-primary/90">{item.animeTitle}</span>
+                                        </span>
+                                    </div>
+                                    <span className="shrink-0 text-[10px] font-mono text-zinc-500 bg-zinc-900/70 px-2 py-1 rounded-full border border-white/5">
+                                        EP {item.episode}
+                                    </span>
+                                </div>
                             </div>
                         ))}
                     </div>

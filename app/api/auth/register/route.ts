@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
 import { query } from '@/lib/db';
 
+interface ExistingUserRow {
+  id: number;
+}
+
 export async function POST(request: Request) {
   try {
     const { username, password, name } = await request.json();
@@ -11,7 +15,7 @@ export async function POST(request: Request) {
     }
 
     // 检查用户是否已存在
-    const existingUsers = await query<any[]>('SELECT id FROM users WHERE username = ?', [username]);
+    const existingUsers = await query<ExistingUserRow[]>('SELECT id FROM users WHERE username = ?', [username]);
     if (existingUsers && existingUsers.length > 0) {
       return NextResponse.json({ error: '用户名已存在' }, { status: 400 });
     }
@@ -26,7 +30,7 @@ export async function POST(request: Request) {
     );
 
     return NextResponse.json({ message: '注册成功' }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Registration error:', error);
     return NextResponse.json({ error: '注册过程中出现错误' }, { status: 500 });
   }

@@ -5,6 +5,11 @@ import { deleteAnimeRecord, getAnimeRecord, updateAnimeRecord, AnimeRecord } fro
 import { buildVoiceActorAliases } from '@/lib/ai';
 import { normalizeStringArray } from '@/lib/anime-cast';
 import { addBatchWatchHistory, deleteWatchHistoryByAnime } from '@/lib/history';
+import { query } from '@/lib/db';
+
+type SessionUser = {
+  role?: string;
+};
 
 function parseId(idParam: string) {
   const id = Number(idParam);
@@ -32,14 +37,12 @@ export async function DELETE(
   context: { params: { id: string } }
 ) {
   const session = await getServerSession(authOptions);
-  if ((session?.user as any)?.role !== 'admin') {
+  if ((session?.user as SessionUser | undefined)?.role !== 'admin') {
     return NextResponse.json({ error: '只有管理员可以删除数据' }, { status: 403 });
   }
 
   const id = parseId(context.params.id);
   if (!id) return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
-
-  const existing = await getAnimeRecord(id);
 
   await deleteAnimeRecord(id);
   // Also clean up history when anime is deleted
@@ -53,7 +56,7 @@ export async function PATCH(
   context: { params: { id: string } }
 ) {
   const session = await getServerSession(authOptions);
-  if ((session?.user as any)?.role !== 'admin') {
+  if ((session?.user as SessionUser | undefined)?.role !== 'admin') {
     return NextResponse.json({ error: '只有管理员可以修改数据' }, { status: 403 });
   }
 
@@ -68,13 +71,14 @@ export async function PATCH(
     cast: normalizeStringArray(body.cast) ?? body.cast,
     castAliases: normalizeStringArray(body.castAliases) ?? body.castAliases,
   };
-  const allowedKeys = ['title', 'originalTitle', 'status', 'progress', 'score', 'totalEpisodes', 'notes', 'coverUrl', 'durationMinutes', 'tags', 'summary', 'startDate', 'endDate', 'premiereDate', 'studio', 'director', 'originalWork', 'cast', 'castAliases', 'isFinished'] as const;
+  const allowedKeys = ['title', 'originalTitle', 'status', 'progress', 'score', 'totalEpisodes', 'notes', 'coverUrl', 'durationMinutes', 'tags', 'summary', 'startDate', 'endDate', 'premiereDate', 'originalWork', 'cast', 'castAliases', 'isFinished'] as const;
+  type AllowedKey = (typeof allowedKeys)[number];
   const updateData: Partial<AnimeRecord> = {};
 
   for (const key of allowedKeys) {
-    if (normalizedBody[key] !== undefined) {
-      // @ts-ignore
-      updateData[key] = normalizedBody[key];
+    const value = normalizedBody[key];
+    if (value !== undefined) {
+      (updateData as Record<AllowedKey, unknown>)[key] = value;
     }
   }
 
@@ -112,7 +116,6 @@ export async function PATCH(
         await addBatchWatchHistory(updated.id, updated.title, before.progress + 1, updated.progress);
     } else if (delta < 0) {
         // If progress decreased, remove history entries beyond new progress to keep it consistent
-        const { query } = require('@/lib/db');
         await query(
             'DELETE FROM watch_history WHERE animeId = ? AND episode > ?', 
             [updated.id, updated.progress]

@@ -18,8 +18,6 @@ export interface AnimeRecord {
   durationMinutes?: number; // Average duration per episode in minutes
   notes?: string;
   tags?: string[]; // New: Tags
-  studio?: string;
-  director?: string;
   originalWork?: string;
   cast?: string[];
   castAliases?: string[];
@@ -43,8 +41,6 @@ export interface CreateAnimeDTO {
   durationMinutes?: number;
   notes?: string;
   tags?: string[];
-  studio?: string;
-  director?: string;
   originalWork?: string;
   cast?: string[];
   castAliases?: string[];
@@ -55,8 +51,32 @@ export interface CreateAnimeDTO {
   isFinished?: boolean;
 }
 
+interface AnimeRow extends RowDataPacket {
+  id: number;
+  title: string;
+  original_title?: string | null;
+  coverUrl?: string | null;
+  status: AnimeStatus;
+  score?: number | string | null;
+  progress: number;
+  totalEpisodes?: number | null;
+  durationMinutes?: number | null;
+  notes?: string | null;
+  tags?: string | null;
+  summary?: string | null;
+  start_date?: Date | string | null;
+  end_date?: Date | string | null;
+  premiere_date?: Date | string | null;
+  original_work?: string | null;
+  cast?: string | null;
+  cast_aliases?: string | null;
+  isFinished?: number | boolean | null;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
+
 // Helper to convert DB Row to AnimeRecord
-function mapRowToAnimeRecord(row: any): AnimeRecord {
+function mapRowToAnimeRecord(row: AnimeRow): AnimeRecord {
   return {
     id: row.id,
     title: row.title,
@@ -65,8 +85,6 @@ function mapRowToAnimeRecord(row: any): AnimeRecord {
     status: row.status as AnimeStatus,
     score: row.score ? Number(row.score) : undefined,
     progress: row.progress,
-    studio: row.studio || undefined,
-    director: row.director || undefined,
     originalWork: row.original_work || undefined,
     cast: parseJsonStringArray(row.cast),
     castAliases: parseJsonStringArray(row.cast_aliases),
@@ -86,7 +104,7 @@ function mapRowToAnimeRecord(row: any): AnimeRecord {
 
 export async function listAnimeRecords(status?: AnimeStatus): Promise<AnimeRecord[]> {
   let sql = 'SELECT * FROM anime';
-  const params: any[] = [];
+  const params: unknown[] = [];
   
   if (status) {
     sql += ' WHERE status = ?';
@@ -95,20 +113,20 @@ export async function listAnimeRecords(status?: AnimeStatus): Promise<AnimeRecor
   
   sql += ' ORDER BY updatedAt DESC';
 
-  const rows = await query<RowDataPacket[]>(sql, params);
+  const rows = await query<AnimeRow[]>(sql, params);
   return rows.map(mapRowToAnimeRecord);
 }
 
 export async function getAnimeRecord(id: number): Promise<AnimeRecord | null> {
-  const rows = await query<RowDataPacket[]>('SELECT * FROM anime WHERE id = ?', [id]);
+  const rows = await query<AnimeRow[]>('SELECT * FROM anime WHERE id = ?', [id]);
   if (rows.length === 0) return null;
   return mapRowToAnimeRecord(rows[0]);
 }
 
 export async function createAnimeRecord(input: CreateAnimeDTO): Promise<AnimeRecord> {
   const sql = `
-    INSERT INTO anime (title, original_title, coverUrl, status, score, progress, totalEpisodes, durationMinutes, notes, tags, summary, start_date, end_date, premiere_date, studio, director, original_work, cast, cast_aliases, isFinished) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO anime (title, original_title, coverUrl, status, score, progress, totalEpisodes, durationMinutes, notes, tags, summary, start_date, end_date, premiere_date, original_work, cast, cast_aliases, isFinished) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
   
   const params = [
@@ -126,8 +144,6 @@ export async function createAnimeRecord(input: CreateAnimeDTO): Promise<AnimeRec
     input.startDate || null,
     input.endDate || null,
     input.premiereDate || null,
-    input.studio || null,
-    input.director || null,
     input.originalWork || null,
     JSON.stringify(input.cast || []),
     JSON.stringify(input.castAliases || []),
@@ -149,7 +165,7 @@ export async function updateAnimeRecord(
 ): Promise<AnimeRecord | null> {
   // Dynamic update query
   const fields: string[] = [];
-  const params: any[] = [];
+  const params: unknown[] = [];
 
   if (input.originalTitle !== undefined) { fields.push('original_title = ?'); params.push(input.originalTitle); }
   if (input.title !== undefined) { fields.push('title = ?'); params.push(input.title); }
@@ -165,8 +181,6 @@ export async function updateAnimeRecord(
   if (input.startDate !== undefined) { fields.push('start_date = ?'); params.push(input.startDate); }
   if (input.endDate !== undefined) { fields.push('end_date = ?'); params.push(input.endDate); }
   if (input.premiereDate !== undefined) { fields.push('premiere_date = ?'); params.push(input.premiereDate); }
-  if (input.studio !== undefined) { fields.push('studio = ?'); params.push(input.studio); }
-  if (input.director !== undefined) { fields.push('director = ?'); params.push(input.director); }
   if (input.originalWork !== undefined) { fields.push('original_work = ?'); params.push(input.originalWork); }
   if (input.cast !== undefined) { fields.push('cast = ?'); params.push(JSON.stringify(input.cast)); }
   if (input.castAliases !== undefined) { fields.push('cast_aliases = ?'); params.push(JSON.stringify(input.castAliases)); }
@@ -188,11 +202,11 @@ export async function deleteAnimeRecord(id: number): Promise<void> {
 
 export async function findAnimeByTitle(title: string): Promise<AnimeRecord | null> {
   // Try exact match first
-  let rows = await query<RowDataPacket[]>('SELECT * FROM anime WHERE title = ?', [title]);
+  let rows = await query<AnimeRow[]>('SELECT * FROM anime WHERE title = ?', [title]);
   
   // If not found, try simple fuzzy match (e.g. title starts with)
   if (rows.length === 0) {
-     rows = await query<RowDataPacket[]>('SELECT * FROM anime WHERE title LIKE ? LIMIT 1', [`%${title}%`]);
+    rows = await query<AnimeRow[]>('SELECT * FROM anime WHERE title LIKE ? LIMIT 1', [`%${title}%`]);
   }
   
   if (rows.length === 0) return null;

@@ -13,9 +13,13 @@ interface IncomingRecord extends Partial<CreateAnimeDTO> {
   title: string;
 }
 
+type SessionUser = {
+  role?: string;
+};
+
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions);
-  if ((session?.user as any)?.role !== 'admin') {
+  if ((session?.user as SessionUser | undefined)?.role !== 'admin') {
     return NextResponse.json({ error: '只有管理员可以导入数据' }, { status: 403 });
   }
 
@@ -63,7 +67,8 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, created, updated });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || '导入失败' }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : '导入失败';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
