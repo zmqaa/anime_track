@@ -41,7 +41,7 @@ export default function DashboardHeader({ isLoading, isRefreshing }: DashboardHe
                         Metadata Enabled
                     </div>
                 </div>
-                <h1 className="text-4xl md:text-5xl font-display font-semibold tracking-tight text-foreground/95 flex items-center gap-4">
+                <h1 className="text-3xl md:text-4xl font-display font-semibold tracking-tight text-foreground/95 flex items-center gap-4">
                     动漫记录总览
                 </h1>
                 <p className="text-sm md:text-base text-zinc-400 leading-7 max-w-2xl">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { MagnifyingGlassIcon, TvIcon, TagIcon, SparklesIcon, FireIcon } from '@heroicons/react/24/outline';
@@ -28,8 +28,10 @@ export default function AnimePageClient() {
   const [filterStatus, setFilterStatus] = useState<AnimeStatus | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [castQuery, setCastQuery] = useState('');
+  const [tagFilter, setTagFilter] = useState('');
   const [sortBy, setSortBy] = useState<AnimeSortBy>('updatedAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const hasSyncedUrlFilters = useRef(false);
   
   // 从 URL 读取页码，默认 1，缺失时回退 sessionStorage
   const currentPage = useMemo(() => {
@@ -95,11 +97,30 @@ export default function AnimePageClient() {
   }, [loadItems]);
 
   useEffect(() => {
+    if (hasSyncedUrlFilters.current) {
+      return;
+    }
+
+    const castFromUrl = searchParams.get('cast')?.trim();
+    const tagFromUrl = searchParams.get('tag')?.trim();
+
+    if (castFromUrl) {
+      setCastQuery(castFromUrl);
+    }
+
+    if (tagFromUrl) {
+      setTagFilter(tagFromUrl);
+    }
+
+    hasSyncedUrlFilters.current = true;
+  }, [searchParams]);
+
+  useEffect(() => {
     // 只有当过滤器改变时才重置到第一页
-    if (currentPage !== 1 && (filterStatus !== 'all' || searchQuery !== '' || castQuery !== '')) {
+    if (currentPage !== 1 && (filterStatus !== 'all' || searchQuery !== '' || castQuery !== '' || tagFilter !== '')) {
         setCurrentPage(1);
     }
-  }, [currentPage, filterStatus, searchQuery, castQuery, sortBy, sortOrder, setCurrentPage]);
+  }, [currentPage, filterStatus, searchQuery, castQuery, tagFilter, sortBy, sortOrder, setCurrentPage]);
 
   const resetForm = () => {
     setShowForm(false);
@@ -201,7 +222,8 @@ export default function AnimePageClient() {
 
       const title = data?.entry?.title || '番剧';
       const progress = data?.entry?.progress;
-      const stateText = data?.created ? '已新建并记录' : '已记录';
+      const rewatchTag = typeof data?.rewatchTag === 'string' ? data.rewatchTag : '';
+      const stateText = data?.created ? (rewatchTag ? `${rewatchTag}已新建并记录` : '已新建并记录') : '已记录';
       setQuickMessage(`${stateText}：${title}${Number.isFinite(progress) ? `（EP ${progress}）` : ''}`);
     } catch (error) {
       console.error('Quick record failed:', error);
@@ -230,13 +252,31 @@ export default function AnimePageClient() {
       .map(([name]) => name);
   }, [items]);
 
+  const tagPreferences = useMemo(() => {
+    return Array.from(new Set(items.flatMap((item) => item.tags || [])))
+      .map((tag) => ({
+        tag,
+        count: items.filter((item) => (item.tags || []).includes(tag)).length,
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 18);
+  }, [items]);
+
+  const toggleTagFilter = useCallback((tag: string) => {
+    setTagFilter((current) => (current === tag ? '' : tag));
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    }
+  }, [currentPage, setCurrentPage]);
+
   // 综合过滤与排序
   const filteredItems = useMemo(() => {
     const result = items.filter(item => {
       const matchesStatus = filterStatus === 'all' || item.status === filterStatus;
       const matchesSearch = matchesTextQuery(searchQuery, [item.title, item.originalTitle], item.cast, item.castAliases);
       const matchesCast = matchesTextQuery(castQuery, item.cast, item.castAliases);
-      return matchesStatus && matchesSearch && matchesCast;
+      const matchesTag = matchesTextQuery(tagFilter, item.tags);
+      return matchesStatus && matchesSearch && matchesCast && matchesTag;
     });
 
     return result.sort((a, b) => {
@@ -263,7 +303,7 @@ export default function AnimePageClient() {
       if (comparableA > comparableB) return sortOrder === 'asc' ? 1 : -1;
       return 0;
     });
-  }, [items, filterStatus, searchQuery, castQuery, sortBy, sortOrder]);
+  }, [items, filterStatus, searchQuery, castQuery, tagFilter, sortBy, sortOrder]);
 
   const totalPages = Math.max(1, Math.ceil(filteredItems.length / pageSize));
   const safePage = Math.min(currentPage, totalPages);
@@ -317,7 +357,7 @@ export default function AnimePageClient() {
             </button>
           </form>
 
-          <p className="text-xs text-zinc-500 mt-2">自动识别番名、集数并更新进度，同时写入观看历史。</p>
+          <p className="text-xs text-zinc-500 mt-2">自动识别番名、集数并更新进度，同时写入观看历史。句子里写“二刷 / 3刷 / 重刷”会新建同名条目并自动打标签。</p>
           {quickMessage && (
             <p className={`text-xs mt-2 ${quickMessage.includes('失败') || quickMessage.includes('请输入') ? 'text-red-400' : 'text-emerald-400'}`}>
               {quickMessage}
@@ -355,6 +395,19 @@ export default function AnimePageClient() {
               setSortOrder={setSortOrder}
               itemsCount={filteredItems.length}
             />
+
+            {tagFilter && (
+              <div className="flex items-center justify-between rounded-xl border border-purple-500/20 bg-purple-500/10 px-3 py-2">
+                <span className="text-xs text-purple-200">已按标签筛选：#{tagFilter}</span>
+                <button
+                  type="button"
+                  onClick={() => setTagFilter('')}
+                  className="text-[11px] text-purple-200/80 hover:text-white"
+                >
+                  清除
+                </button>
+              </div>
+            )}
           </div>
 
           {isAdmin && showForm && (
@@ -415,14 +468,14 @@ export default function AnimePageClient() {
                 <div className="p-5 rounded-2xl bg-blue-500/5 border border-blue-500/10 hover:bg-blue-500/10 transition-all group/stat">
                   <p className="text-xs text-blue-400 font-bold uppercase mb-3 tracking-wider group-hover/stat:translate-x-1 transition-transform">还没看完</p>
                   <div className="flex items-baseline gap-2">
-                    <p className="text-4xl font-bold text-white tracking-tighter leading-none">{items.filter(i => i.status !== 'completed').length}</p>
+                    <p className="text-3xl font-bold text-white tracking-tighter leading-none">{items.filter(i => i.status !== 'completed').length}</p>
                     <p className="text-xs text-zinc-500 font-bold">部</p>
                   </div>
                 </div>
                 <div className="p-5 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 hover:bg-emerald-500/10 transition-all group/stat">
                   <p className="text-xs text-emerald-400 font-bold uppercase mb-3 tracking-wider group-hover/stat:translate-x-1 transition-transform">已经看完</p>
                   <div className="flex items-baseline gap-2">
-                    <p className="text-4xl font-bold text-white tracking-tighter leading-none">{items.filter(i => i.status === 'completed').length}</p>
+                    <p className="text-3xl font-bold text-white tracking-tighter leading-none">{items.filter(i => i.status === 'completed').length}</p>
                     <p className="text-xs text-zinc-500 font-bold">部</p>
                   </div>
                 </div>
@@ -463,19 +516,25 @@ export default function AnimePageClient() {
                 风格偏好
              </h3>
              <div className="flex flex-wrap gap-2.5 relative z-10">
-                {Array.from(new Set(items.flatMap(i => i.tags || [])))
-                    .map(tag => ({ 
-                        tag, 
-                        count: items.filter(i => (i.tags || []).includes(tag)).length 
-                    }))
-                    .sort((a, b) => b.count - a.count)
-                    .slice(0, 18)
-                    .map(({ tag, count }) => (
-                        <div key={tag} className="flex items-center gap-2 px-4 py-1.5 rounded-xl bg-zinc-950/50 border border-white/5 hover:border-purple-500/30 hover:bg-purple-500/5 transition-all group/tag">
-                            <span className="text-xs font-medium text-zinc-400 group-hover/tag:text-purple-300 transition-colors">{tag}</span>
-                            <span className="text-[10px] text-zinc-600 font-mono group-hover/tag:text-purple-500/50">{count}</span>
-                        </div>
-                    ))}
+              {tagPreferences.map(({ tag, count }) => {
+                const isActive = tagFilter === tag;
+                return (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => toggleTagFilter(tag)}
+                    className={`flex items-center gap-2 px-4 py-1.5 rounded-xl border transition-all group/tag ${
+                      isActive
+                        ? 'bg-purple-500/15 border-purple-500/40'
+                        : 'bg-zinc-950/50 border-white/5 hover:border-purple-500/30 hover:bg-purple-500/5'
+                    }`}
+                  >
+                    <span className={`text-xs font-medium transition-colors ${isActive ? 'text-purple-200' : 'text-zinc-400 group-hover/tag:text-purple-300'}`}>{tag}</span>
+                    <span className={`text-[10px] font-mono ${isActive ? 'text-purple-300/80' : 'text-zinc-600 group-hover/tag:text-purple-500/50'}`}>{count}</span>
+                  </button>
+                );
+              })}
+              {!tagPreferences.length && <div className="text-xs text-zinc-500">标签还在累计中。</div>}
              </div>
           </div>
 

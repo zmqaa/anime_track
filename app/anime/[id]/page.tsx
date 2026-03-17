@@ -1,5 +1,6 @@
 "use client";
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeftIcon, PencilSquareIcon, TrashIcon, CalendarIcon, CheckCircleIcon, ClockIcon, PlayCircleIcon, SparklesIcon } from '@heroicons/react/24/outline';
@@ -206,7 +207,7 @@ export default function AnimeDetailPage({ params }: { params: { id: string } }) 
                                     className="w-full bg-transparent text-3xl font-bold text-white border-b border-zinc-700 focus:border-purple-500 focus:outline-none p-1"
                                  />
                              ) : (
-                                 <h1 className="text-4xl font-bold text-white leading-tight">{item.title}</h1>
+                                 <h1 className="text-3xl font-bold text-white leading-tight">{item.title}</h1>
                              )}
                              
                              {isEditing ? (
@@ -376,9 +377,13 @@ export default function AnimeDetailPage({ params }: { params: { id: string } }) 
                                  <div className="flex flex-wrap gap-2">
                                      {item.cast && item.cast.length > 0 ? (
                                          item.cast.map((cv: string, idx: number) => (
-                                             <span key={idx} className="px-2 py-0.5 bg-zinc-800/50 rounded text-xs text-zinc-300 border border-white/5 hover:bg-purple-500/20 hover:text-purple-200 transition-colors cursor-pointer">
+                                             <Link
+                                                 key={`${cv}-${idx}`}
+                                                 href={`/anime?cast=${encodeURIComponent(cv)}`}
+                                                 className="px-2 py-0.5 bg-zinc-800/50 rounded text-xs text-zinc-300 border border-white/5 hover:bg-purple-500/20 hover:text-purple-200 transition-colors"
+                                             >
                                                  {cv}
-                                             </span>
+                                             </Link>
                                          ))
                                      ) : (
                                          <span className="text-zinc-600">-</span>

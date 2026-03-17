@@ -7,5 +7,5 @@ export default withAuth({
 });
 
 export const config = {
-  matcher: ["/((?!api/auth|login|register|favicon.ico).*)"],
+  matcher: ["/", "/anime/:path*"],
 };

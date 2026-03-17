@@ -87,7 +87,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
                     Anime Archive
                   </div>
                   <div>
-                    <h1 className="text-2xl font-display tracking-tight text-zinc-100">{config.appName}</h1>
+                    <h1 className="text-xl font-display tracking-tight text-zinc-100">{config.appName}</h1>
                     <p className="text-xs leading-5 text-zinc-400 max-w-[14rem]">
                       把观看记录、评分和作品元数据收进同一座静态番剧馆。
                     </p>

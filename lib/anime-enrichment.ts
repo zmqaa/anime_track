@@ -28,6 +28,15 @@ function hasPlaceholderCover(value: string | undefined | null): boolean {
   return !!value && value.includes('placeholder');
 }
 
+function normalizeTitle(value: string | undefined | null): string | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  const normalized = value.trim();
+  return normalized || undefined;
+}
+
 export async function enrichAnimeInput(input: CreateAnimeDTO, options: AnimeEnrichmentOptions = {}): Promise<CreateAnimeDTO> {
   const mode = options.mode || 'create';
   const originalUserTitle = (options.originalUserTitle || input.title || '').trim();
@@ -48,8 +57,8 @@ export async function enrichAnimeInput(input: CreateAnimeDTO, options: AnimeEnri
   try {
     const enriched = await enrichAnimeData(originalUserTitle);
     if (enriched) {
-      if (mode === 'create' && !isBlank(enriched.officialTitle)) {
-        const officialTitle = enriched.officialTitle.trim();
+      const officialTitle = normalizeTitle(enriched.officialTitle);
+      if ((mode === 'create' || mode === 'fill-missing') && officialTitle) {
         titleWasStandardized = officialTitle !== originalUserTitle;
         data.title = officialTitle;
       }
@@ -92,6 +101,12 @@ export async function enrichAnimeInput(input: CreateAnimeDTO, options: AnimeEnri
   try {
     const metadata = await fetchAnimeMetadataByQueries(data.originalTitle, data.title, originalUserTitle);
     if (metadata) {
+      const providerTitle = normalizeTitle(metadata.title);
+      if ((mode === 'create' || mode === 'fill-missing') && providerTitle && !titleWasStandardized && providerTitle !== data.title) {
+        titleWasStandardized = providerTitle !== originalUserTitle;
+        data.title = providerTitle;
+      }
+
       if (!isBlank(metadata.coverUrl) && (isBlank(data.coverUrl) || hasPlaceholderCover(data.coverUrl))) {
         data.coverUrl = metadata.coverUrl;
       }

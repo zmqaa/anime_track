@@ -25,9 +25,20 @@ interface AnimeCardProps {
   isAdmin?: boolean;
 }
 
+function resolveRewatchTag(tags?: string[]): string | undefined {
+  if (!Array.isArray(tags) || tags.length === 0) {
+    return undefined;
+  }
+
+  return tags
+    .map((tag) => tag.trim())
+    .find((tag) => /^([0-9]{1,3}|[一二两三四五六七八九十]+)刷$/i.test(tag));
+}
+
 export default function AnimeCard({ item, onEdit, updateProgress, isAdmin = false }: AnimeCardProps) {
   const isCompleted = item.status === 'completed';
   const progressPercent = item.totalEpisodes ? (item.progress / item.totalEpisodes) * 100 : 0;
+  const rewatchTag = resolveRewatchTag(item.tags);
 
   return (
     <div className="group relative bg-[#121214] border border-white/5 rounded-2xl overflow-hidden hover:border-white/10 transition-all duration-300 hover:shadow-2xl hover:shadow-black/40">
@@ -68,6 +79,11 @@ export default function AnimeCard({ item, onEdit, updateProgress, isAdmin = fals
             {item.durationMinutes && (
               <span className="px-2 py-0.5 rounded-full text-[10px] font-medium border border-white/5 bg-black/40 text-zinc-300 backdrop-blur-md">
                   {item.durationMinutes}m
+              </span>
+            )}
+            {rewatchTag && (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-medium border border-amber-400/30 bg-amber-400/15 text-amber-100 backdrop-blur-md">
+                  {rewatchTag}
               </span>
             )}
           </div>

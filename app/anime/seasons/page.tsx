@@ -154,7 +154,7 @@ export default function AnimeSeasonsPage() {
             <div className="inline-flex items-center gap-2 rounded-full border border-sky-300/20 bg-sky-300/10 px-3 py-1 text-[10px] uppercase tracking-[0.32em] text-sky-100/80">
               Seasonal Notebook
             </div>
-            <h1 className="text-4xl md:text-5xl font-display font-semibold tracking-tight text-zinc-50">番剧档期簿</h1>
+            <h1 className="text-3xl md:text-4xl font-display font-semibold tracking-tight text-zinc-50">番剧档期簿</h1>
             <p className="text-sm md:text-base text-zinc-400 leading-7">
               专门展示首播档期、完结状态与季节结构。这个页面更偏“编目视角”，能快速看到片库集中在哪些年份和季度。
             </p>
@@ -162,12 +162,12 @@ export default function AnimeSeasonsPage() {
           <div className="grid grid-cols-2 gap-3 min-w-full lg:min-w-[360px] lg:max-w-[380px]">
             <div className="rounded-[24px] border border-white/8 bg-white/[0.03] p-4">
               <div className="text-[10px] uppercase tracking-[0.28em] text-zinc-500">Premiere</div>
-              <div className="mt-2 text-3xl font-mono text-zinc-100">{withPremiereCount}</div>
+              <div className="mt-2 text-2xl font-mono text-zinc-100">{withPremiereCount}</div>
               <div className="text-xs text-zinc-500 mt-1">有首播日期的作品</div>
             </div>
             <div className="rounded-[24px] border border-white/8 bg-white/[0.03] p-4">
               <div className="text-[10px] uppercase tracking-[0.28em] text-zinc-500">Finished</div>
-              <div className="mt-2 text-3xl font-mono text-emerald-300">{finishedCount}</div>
+              <div className="mt-2 text-2xl font-mono text-emerald-300">{finishedCount}</div>
               <div className="text-xs text-zinc-500 mt-1">已完结或已看完</div>
             </div>
           </div>

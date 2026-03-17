@@ -203,21 +203,27 @@ export default memo(function AdvancedActivityStats({ history, animeList }: { his
                     ))}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 xl:grid-cols-1 gap-4">
-                    <div className="rounded-[28px] border border-white/8 bg-white/[0.02] p-5">
-                        <div className="text-[10px] uppercase tracking-[0.28em] text-zinc-500">Peak Point</div>
-                        <div className="mt-3 text-2xl font-display text-zinc-100">{statsData.peakPoint.label}</div>
-                        <div className="mt-1 text-sm text-zinc-400">单点最高记录为 {statsData.peakPoint.value} 集</div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 xl:flex xl:flex-col gap-3 xl:h-64">
+                    <div className="flex-1 rounded-[24px] border border-white/8 bg-white/[0.02] px-4 py-3 flex flex-col justify-between">
+                        <div className="text-[9px] uppercase tracking-[0.3em] text-zinc-600">Peak Point</div>
+                        <div className="flex items-end justify-between gap-2">
+                            <span className="text-xl font-display text-zinc-100 leading-tight">{statsData.peakPoint.label}</span>
+                            <span className="text-[10px] text-zinc-500 font-mono pb-0.5">max {statsData.peakPoint.value} EP</span>
+                        </div>
                     </div>
-                    <div className="rounded-[28px] border border-white/8 bg-white/[0.02] p-5">
-                        <div className="text-[10px] uppercase tracking-[0.28em] text-zinc-500">Active Days</div>
-                        <div className="mt-3 text-2xl font-mono text-emerald-300">{statsData.activeDays}</div>
-                        <div className="mt-1 text-sm text-zinc-400">这一时间尺度下有记录的天数</div>
+                    <div className="flex-1 rounded-[24px] border border-white/8 bg-white/[0.02] px-4 py-3 flex flex-col justify-between">
+                        <div className="text-[9px] uppercase tracking-[0.3em] text-zinc-600">Active Days</div>
+                        <div className="flex items-end justify-between gap-2">
+                            <span className="text-xl font-mono text-emerald-300">{statsData.activeDays}</span>
+                            <span className="text-[10px] text-zinc-500 pb-0.5">有记录天</span>
+                        </div>
                     </div>
-                    <div className="rounded-[28px] border border-white/8 bg-white/[0.02] p-5">
-                        <div className="text-[10px] uppercase tracking-[0.28em] text-zinc-500">Library Coverage</div>
-                        <div className="mt-3 text-2xl font-mono text-cyan-300">{statsData.libraryCoverage}%</div>
-                        <div className="mt-1 text-sm text-zinc-400">相对整库已知集数的推进占比</div>
+                    <div className="flex-1 rounded-[24px] border border-white/8 bg-white/[0.02] px-4 py-3 flex flex-col justify-between">
+                        <div className="text-[9px] uppercase tracking-[0.3em] text-zinc-600">Library Cov.</div>
+                        <div className="flex items-end justify-between gap-2">
+                            <span className="text-xl font-mono text-cyan-300">{statsData.libraryCoverage}%</span>
+                            <span className="text-[10px] text-zinc-500 pb-0.5">整库占比</span>
+                        </div>
                     </div>
                 </div>
             </div>

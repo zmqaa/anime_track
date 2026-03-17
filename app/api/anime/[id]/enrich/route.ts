@@ -83,6 +83,10 @@ export async function POST(
 
   const patch: Partial<CreateAnimeDTO> = {};
 
+  if (enriched.title && enriched.title !== record.title) {
+    patch.title = enriched.title;
+  }
+
   if (enriched.coverUrl && enriched.coverUrl !== record.coverUrl) {
     patch.coverUrl = enriched.coverUrl;
   }

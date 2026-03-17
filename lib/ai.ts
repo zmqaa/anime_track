@@ -149,6 +149,18 @@ function parseChineseNumberToken(token: string): number | undefined {
   return value > 0 ? value : undefined;
 }
 
+function cleanWatchSentenceTitle(text: string): string {
+  return text
+    .replace(/^(我)?\s*(今天|昨天|前天|昨晚|今晚|刚刚|刚才)?\s*(看了|补了|追了|刷了|重刷了|二刷了|看完了|看完|看)\s*/i, '')
+    .replace(/\s+(今天|昨天|前天|昨晚|今晚)\s*(看了|补了|追了|刷了|重刷了|二刷了|看完了|看完|看)\s+/gi, ' ')
+    .replace(/\s*(今天|昨天|前天|昨晚|今晚|刚刚|刚才)?\s*(看了|补了|追了|刷了|重刷了|二刷了|看完了|看完|看)\s*$/i, ' ')
+    .replace(/第\s*[0-9一二三四五六七八九十百零两〇]+\s*季/gi, ' ')
+    .replace(/第\s*[0-9一二三四五六七八九十百零两〇]+\s*[集话話]/gi, ' ')
+    .replace(/[，。,.!！?？]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 function parseWatchInputFallback(inputText: string): ParsedWatchInput | null {
   const text = inputText.trim();
   if (!text) {
@@ -161,12 +173,16 @@ function parseWatchInputFallback(inputText: string): ParsedWatchInput | null {
   const season = seasonToken ? parseChineseNumberToken(seasonToken) : undefined;
   const episode = episodeToken ? parseChineseNumberToken(episodeToken) : undefined;
 
-  let animeTitle = text
-    .replace(/^(我)?\s*(今天|昨天|前天)?\s*(看了|补了|追了|刷了|看完了|看完|看)\s*/i, '')
-    .replace(/第\s*[0-9一二三四五六七八九十百零两〇]+\s*季/gi, '')
-    .replace(/第\s*[0-9一二三四五六七八九十百零两〇]+\s*[集话話]/gi, '')
-    .replace(/[，。,.!！?？]/g, ' ')
-    .trim();
+  let animeTitle = cleanWatchSentenceTitle(text);
+
+  if (!animeTitle) {
+    animeTitle = text
+      .replace(/第\s*[0-9一二三四五六七八九十百零两〇]+\s*季/gi, ' ')
+      .replace(/第\s*[0-9一二三四五六七八九十百零两〇]+\s*[集话話]/gi, ' ')
+      .replace(/[，。,.!！?？]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
 
   if (!animeTitle) {
     animeTitle = text;

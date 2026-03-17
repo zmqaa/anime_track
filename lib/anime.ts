@@ -213,6 +213,11 @@ export async function findAnimeByTitle(title: string): Promise<AnimeRecord | nul
   return mapRowToAnimeRecord(rows[0]);
 }
 
+export async function listAnimeRecordsByExactTitle(title: string): Promise<AnimeRecord[]> {
+  const rows = await query<AnimeRow[]>('SELECT * FROM anime WHERE title = ? ORDER BY createdAt DESC', [title]);
+  return rows.map(mapRowToAnimeRecord);
+}
+
 export async function updateAnimeProgress(id: number, progress: number): Promise<void> {
     await query('UPDATE anime SET progress = ?, updatedAt = NOW() WHERE id = ?', [progress, id]);
 }

@@ -43,11 +43,11 @@ export default function AnimeTimelinePage() {
             <Link href="/anime" className="text-zinc-500 hover:text-white flex items-center gap-1 text-sm mb-4 transition-colors">
                 <ChevronLeftIcon className="w-4 h-4" /> 返回番剧管理
             </Link>
-            <h1 className="text-4xl font-bold tracking-tight">追番见证录</h1>
+            <h1 className="text-3xl font-bold tracking-tight">追番见证录</h1>
             <p className="text-zinc-500 font-mono text-xs uppercase tracking-widest">Anime Watch Journey Timeline</p>
         </div>
         <div className="hidden sm:block text-right">
-            <span className="text-5xl font-black text-white/5 italic select-none">TIMELINE</span>
+            <span className="text-4xl font-black text-white/5 italic select-none">TIMELINE</span>
         </div>
       </header>
 

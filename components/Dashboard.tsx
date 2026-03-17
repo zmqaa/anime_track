@@ -9,7 +9,6 @@ import {
     ClockIcon,
     FireIcon,
     SparklesIcon,
-    StarIcon,
     TvIcon,
 } from '@heroicons/react/24/outline';
 import { useAnimeData } from '@/hooks/useAnimeData';
@@ -18,7 +17,7 @@ import { AnimeRecord, AnimeStatus, statusLabels, statusColors } from '@/lib/dash
 import DashboardHeader from './dashboard/DashboardHeader';
 
 // 动态导入组件，减少初始包体积
-const DonutChart = dynamic(() => import('./dashboard/DonutChart').then(mod => mod.DonutChart), { ssr: false });
+const PieChart = dynamic(() => import('./dashboard/PieChart').then(mod => mod.PieChart), { ssr: false });
 const ActivityFeed = dynamic(() => import('./dashboard/ActivityFeed'), { ssr: false });
 const AdvancedActivityStats = dynamic(() => import('./dashboard/AdvancedActivityStats'), { ssr: false });
 
@@ -78,13 +77,22 @@ function formatUpdateDate(value: string) {
     return new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(date);
 }
 
+function formatWatchMoment(value: Date) {
+    if (Number.isNaN(value.getTime())) return '时间未知';
+    return new Intl.DateTimeFormat('zh-CN', {
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+    }).format(value);
+}
+
 export default function Dashboard() {
     const { parsedHistory, isLoading: hLoading, isRefreshing: hRefreshing } = useHistoryData();
     const {
         animeList,
         animeStats,
         animeTagStats,
-        recentTagStats,
         animeCompletionRate,
         isLoading: aLoading,
         isRefreshing: aRefreshing,
@@ -143,7 +151,7 @@ export default function Dashboard() {
             color: 'text-emerald-300',
         },
         {
-            label: '当前连载',
+            label: '当前追番',
             value: (animeStats.byStatus.watching || 0).toString(),
             unit: '部',
             change: 'Watching',
@@ -186,6 +194,24 @@ export default function Dashboard() {
         if (topRated.length > 0) return topRated[0];
         return animeList[0] ?? null;
     }, [animeList, topRated]);
+
+    const recentWatching = useMemo(() => {
+        const animeMap = new Map(animeList.map((anime) => [anime.id, anime]));
+        const seenAnimeIds = new Set<number>();
+        const uniqueItems: Array<{ record: (typeof parsedHistory)[number]; anime?: AnimeRecord }> = [];
+
+        for (const record of [...parsedHistory].sort((a, b) => b.dateObj.getTime() - a.dateObj.getTime())) {
+            if (seenAnimeIds.has(record.animeId)) continue;
+            seenAnimeIds.add(record.animeId);
+            uniqueItems.push({
+                record,
+                anime: animeMap.get(record.animeId),
+            });
+            if (uniqueItems.length >= 9) break;
+        }
+
+        return uniqueItems;
+    }, [animeList, parsedHistory]);
 
     const heroStyle = heroAnime?.coverUrl
         ? {
@@ -246,16 +272,18 @@ export default function Dashboard() {
             .map(([year, count]) => ({ year, count }));
     }, [animeList]);
 
-    const premiereMax = premiereByYear.reduce((max, item) => Math.max(max, item.count), 1);
+    const PREMIERE_PALETTE = ['#5dd6f2', '#56d39c', '#8da6ff', '#f4bf62', '#fb7185', '#a78bfa', '#f97316'] as const;
+    const premierePieData = useMemo(
+        () => premiereByYear.map((item, i) => ({
+            label: `${item.year} 年`,
+            value: item.count,
+            color: PREMIERE_PALETTE[i % PREMIERE_PALETTE.length],
+        })),
+        [premiereByYear]
+    );
 
-    const recentTagDisplay = (recentTagStats.length ? recentTagStats : animeTagStats).slice(0, 5);
-    const recentTagMax = recentTagDisplay.reduce((max, item) => Math.max(max, item.count), 1);
-
-    const donutChartData = (Object.keys(animeStats.byStatus) as AnimeStatus[]).map((status) => ({
-        label: statusLabels[status],
-        value: animeStats.byStatus[status],
-        color: statusColors[status],
-    }));
+    const tagBarData = useMemo(() => animeTagStats.slice(0, 8), [animeTagStats]);
+    const tagBarMax = tagBarData.reduce((max, item) => Math.max(max, item.count), 1);
 
     const statusCards = (Object.keys(animeStats.byStatus) as AnimeStatus[]).map((status) => ({
         status,
@@ -265,7 +293,7 @@ export default function Dashboard() {
     }));
 
     return (
-        <div className="p-4 lg:p-8 space-y-6 lg:space-y-8 animate-fade-in pb-24 relative">
+        <div className="p-4 lg:p-8 space-y-4 lg:space-y-6 animate-fade-in pb-20 relative">
             <div className="absolute inset-0 pointer-events-none opacity-[0.04] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
             <div className="absolute inset-0 pointer-events-none opacity-40 bg-[radial-gradient(circle_at_5%_5%,rgba(86,211,156,0.12),transparent_32%),radial-gradient(circle_at_100%_0%,rgba(93,214,242,0.12),transparent_34%),radial-gradient(circle_at_80%_100%,rgba(244,191,98,0.08),transparent_30%)]" />
 
@@ -281,9 +309,9 @@ export default function Dashboard() {
                             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/12 px-3 py-1 text-[10px] uppercase tracking-[0.32em] text-emerald-100/90">
                                 Archive Main Hall
                             </div>
-                            <h2 className="text-3xl md:text-5xl font-display font-semibold tracking-tight text-zinc-50 leading-tight">
+                            <h2 className="text-2xl md:text-4xl font-display font-semibold tracking-tight text-zinc-50 leading-tight">
                                 私藏番剧馆
-                                <span className="block text-zinc-300 text-lg md:text-2xl mt-3 font-normal">
+                                <span className="block text-zinc-300 text-base md:text-xl mt-3 font-normal">
                                     把观影节律、片库画像和元数据风格收纳进同一个场景。
                                 </span>
                             </h2>
@@ -372,28 +400,29 @@ export default function Dashboard() {
                             className="glass-panel p-6 rounded-[28px] transition-all duration-500 hover:-translate-y-1 group relative overflow-hidden flex flex-col justify-between h-32 border-white/10"
                             style={{ background: 'rgba(14, 21, 19, 0.88)' }}
                         >
-                            <div className="absolute -bottom-4 -right-4 opacity-10 group-hover:opacity-20 transition-all duration-500 scale-150 group-hover:rotate-12">
-                                <stat.icon className={`w-24 h-24 ${stat.color}`} />
+                            {/* 背景装饰图标 */}
+                            <div className="absolute -bottom-3 -right-3 opacity-[0.06] group-hover:opacity-[0.14] transition-all duration-500 scale-150 group-hover:rotate-12 pointer-events-none">
+                                <stat.icon className={`w-20 h-20 ${stat.color}`} />
                             </div>
 
-                            <div className="flex justify-between items-start relative z-10">
-                                <div className="flex items-center gap-2">
-                                    <stat.icon className={`w-5 h-5 ${stat.color} opacity-90`} />
-                                    <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest group-hover:text-zinc-200 transition-colors">
-                                        {stat.label}
-                                    </span>
+                            <div className="flex items-start justify-between relative z-10">
+                                <div className={`flex items-center justify-center w-8 h-8 rounded-xl ${stat.color} bg-current/15 border border-current/20`}>
+                                    <stat.icon className="w-4 h-4" />
                                 </div>
-                                <span className={`text-[10px] font-mono font-bold px-2.5 py-1 rounded-lg border ${stat.color} bg-current/10 border-current/30 shadow-sm`}>
+                                <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-md border ${stat.color} bg-current/8 border-current/25 tracking-widest opacity-75`}>
                                     {stat.change}
                                 </span>
                             </div>
 
-                            <div className="flex items-baseline justify-between relative z-10 mt-2">
+                            <div className="relative z-10">
                                 <div className="flex items-baseline gap-1.5">
                                     <span className="text-3xl font-bold tracking-tight text-white drop-shadow-sm">
                                         {stat.value}
                                     </span>
                                     <span className="text-xs text-zinc-500 font-bold uppercase tracking-tighter">{stat.unit}</span>
+                                </div>
+                                <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.18em] mt-0.5 group-hover:text-zinc-400 transition-colors">
+                                    {stat.label}
                                 </div>
                             </div>
                         </div>
@@ -401,23 +430,40 @@ export default function Dashboard() {
                 </div>
             </LazyRender>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
-                <div className="lg:col-span-8 flex flex-col">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 relative z-10">
+                <div className="lg:col-span-8 flex flex-col gap-4">
                     <LazyRender fallback={<div className="glass-panel rounded-[32px] h-96 animate-pulse" />}>
-                        <div className="glass-panel p-8 rounded-[32px] flex-1 bg-gradient-to-br from-zinc-900/40 via-transparent to-transparent min-h-[420px]">
+                        <div className="glass-panel p-6 lg:p-7 rounded-[32px] flex-1 bg-gradient-to-br from-zinc-900/40 via-transparent to-transparent min-h-[360px]">
                             <AdvancedActivityStats history={parsedHistory} animeList={animeList} />
+                        </div>
+                    </LazyRender>
+
+                    <LazyRender fallback={<div className="glass-panel rounded-[28px] h-36 animate-pulse" />}>
+                        <div className="glass-panel p-4 lg:p-5 rounded-[28px]">
+                            <div className="text-[10px] uppercase tracking-[0.26em] text-zinc-500 mb-3">当前追番状态</div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {statusCards.map((status) => (
+                                    <div key={`top-${status.status}`} className="p-4 rounded-2xl bg-white/[0.03] border border-white/8 flex items-center justify-between">
+                                        <div className="flex items-center gap-2 min-w-0">
+                                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: status.color }} />
+                                            <span className="text-sm font-medium text-zinc-300 truncate">{status.label}</span>
+                                        </div>
+                                        <span className="text-2xl font-bold text-zinc-100 tracking-tight">{status.value}</span>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </LazyRender>
                 </div>
 
-                <div className="lg:col-span-4 space-y-6">
+                <div className="lg:col-span-4 space-y-4">
                     <LazyRender fallback={<div className="glass-panel rounded-[32px] h-64 animate-pulse" />}>
-                        <div className="glass-panel p-7 rounded-[32px] space-y-5">
+                        <div className="glass-panel p-5 rounded-[28px] space-y-4">
                             <div className="flex items-center gap-2">
-                                <SparklesIcon className="w-5 h-5 text-emerald-300" />
+                                <SparklesIcon className="w-4 h-4 text-emerald-300" />
                                 <h2 className="text-sm font-bold uppercase tracking-widest text-zinc-300">元数据完整度</h2>
                             </div>
-                            <div className="space-y-3">
+                            <div className="space-y-2.5">
                                 {metadataCoverage.map((item) => (
                                     <div key={item.label} className="space-y-1.5">
                                         <div className="flex items-center justify-between text-xs">
@@ -433,42 +479,49 @@ export default function Dashboard() {
                                     </div>
                                 ))}
                             </div>
-                            <div className="rounded-[20px] border border-emerald-300/15 bg-emerald-300/10 p-4">
+                            <div className="rounded-[18px] border border-emerald-300/15 bg-emerald-300/10 p-3">
                                 <div className="text-[10px] uppercase tracking-[0.28em] text-emerald-100/80">Metadata Index</div>
-                                <div className="mt-2 text-2xl font-mono text-emerald-100">{metadataRichness}%</div>
-                                <p className="mt-1 text-xs text-zinc-300 leading-5">具备 4 项以上核心字段的作品占比。这个值越高，图谱页和首页就越有质感。</p>
+                                <div className="mt-1.5 text-xl font-mono text-emerald-100">{metadataRichness}%</div>
+                                <p className="mt-1 text-xs text-zinc-300 leading-5">具备 4 项以上核心字段的作品占比。值越高，图谱页和首页越完整。</p>
                             </div>
                         </div>
                     </LazyRender>
 
-                    <LazyRender fallback={<div className="glass-panel rounded-[32px] h-52 animate-pulse" />}>
-                        <div className="glass-panel p-7 rounded-[32px]">
-                            <div className="flex items-center gap-2 mb-5">
-                                <CalendarDaysIcon className="w-5 h-5 text-sky-300" />
-                                <h2 className="text-sm font-bold uppercase tracking-widest text-zinc-300">首播年份分布</h2>
+                    <LazyRender fallback={<div className="glass-panel rounded-[32px] h-72 animate-pulse" />}>
+                        <div className="glass-panel p-5 rounded-[28px] h-[320px] flex flex-col">
+                            <div className="flex items-center gap-2 mb-3">
+                                <CalendarDaysIcon className="w-4 h-4 text-sky-300" />
+                                <h2 className="text-sm font-bold uppercase tracking-widest text-zinc-300">作品开播时间分布</h2>
                             </div>
-                            <div className="space-y-3">
-                                {premiereByYear.map((item) => (
-                                    <div key={item.year} className="space-y-1.5">
-                                        <div className="flex items-center justify-between text-xs text-zinc-400">
-                                            <span>{item.year}</span>
-                                            <span>{item.count} 部</span>
-                                        </div>
-                                        <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
-                                            <div className="h-full rounded-full bg-gradient-to-r from-sky-300 to-cyan-300" style={{ width: `${(item.count / premiereMax) * 100}%` }} />
-                                        </div>
+                            <p className="text-[11px] text-zinc-500 mb-3">基于每部作品的开播日期字段统计</p>
+                            {premierePieData.length > 0 ? (
+                                <div className="grid grid-cols-[140px_minmax(0,1fr)] gap-4 items-center flex-1">
+                                    <div className="flex items-center justify-center">
+                                        <PieChart data={premierePieData} size={132} />
                                     </div>
-                                ))}
-                                {!premiereByYear.length && (
-                                    <div className="text-sm text-zinc-500">首播日期字段还不够多，先在详情页补全几部作品即可生成分布。</div>
-                                )}
-                            </div>
+                                    <div className="space-y-2 max-h-[210px] overflow-y-auto pr-1">
+                                        {premierePieData.map((item) => (
+                                            <div key={`premiere-${item.label}`} className="flex items-center justify-between gap-2 transition-transform duration-200 hover:scale-[1.02]">
+                                                <div className="flex items-center gap-1.5 min-w-0">
+                                                    <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }} />
+                                                    <span className="text-xs text-zinc-300 truncate">{item.label}</span>
+                                                </div>
+                                                <span className="text-xs text-zinc-500 font-mono flex-shrink-0">{item.value} 部</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="flex-1 flex items-center">
+                                    <div className="text-sm text-zinc-500">开播日期字段还不够多，先在详情页补全几部作品即可生成分布。</div>
+                                </div>
+                            )}
                         </div>
                     </LazyRender>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 relative z-10">
                 <div className="lg:col-span-8 space-y-6">
                     <div className="glass-panel p-8 rounded-[32px]">
                         <h2 className="text-sm font-bold uppercase tracking-widest text-zinc-400 flex items-center gap-2 mb-6">
@@ -499,83 +552,80 @@ export default function Dashboard() {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_300px] gap-6">
-                            <div className="space-y-5">
-                                <div className="grid grid-cols-2 gap-4">
-                                    {statusCards.map((status) => (
-                                        <div key={status.status} className="p-4 rounded-2xl bg-white/[0.03] border border-white/6 flex items-center justify-between">
-                                            <div className="flex items-center gap-2 min-w-0">
-                                                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: status.color }} />
-                                                <span className="text-sm font-medium text-zinc-300 truncate">{status.label}</span>
-                                            </div>
-                                            <span className="text-xl font-bold text-zinc-100">{status.value}</span>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <div className="space-y-3">
-                                    <div className="flex items-center justify-between">
-                                        <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">标签分布</h3>
-                                        <div className="h-[1px] flex-1 bg-white/5 mx-4" />
-                                    </div>
-                                    {recentTagDisplay.map((tag) => (
-                                        <div key={tag.tag} className="space-y-1.5">
-                                            <div className="flex justify-between text-[11px] font-bold uppercase tracking-tight">
-                                                <span className="text-zinc-400">{tag.tag}</span>
-                                                <span className="text-zinc-500">{tag.count} 部</span>
-                                            </div>
-                                            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                                                <div
-                                                    className="h-full bg-primary/70 rounded-full"
-                                                    style={{ width: `${(tag.count / recentTagMax) * 100}%` }}
-                                                />
-                                            </div>
-                                        </div>
-                                    ))}
-                                    {!recentTagDisplay.length && <div className="text-sm text-zinc-500">标签数据还在累计中。</div>}
-                                </div>
+                        <div className="rounded-[28px] border border-white/8 bg-white/[0.02] p-5 lg:p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">标签分布</h3>
+                                <span className="text-[10px] text-zinc-600">条形图</span>
                             </div>
 
-                            <div className="rounded-[28px] border border-white/8 bg-white/[0.02] p-5 flex flex-col items-center justify-center">
-                                <DonutChart data={donutChartData} />
-                                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-4">状态比例</p>
+                            <div className="space-y-3">
+                                {tagBarData.map((item) => (
+                                    <div key={`tag-${item.tag}`} className="rounded-xl px-2 py-1.5 transition-all duration-200 hover:scale-[1.01] hover:bg-white/[0.02]">
+                                        <div className="flex items-center justify-between gap-2">
+                                            <span className="text-xs text-zinc-300 truncate">{item.tag}</span>
+                                            <span className="text-xs text-zinc-500 font-mono flex-shrink-0">{item.count} 部</span>
+                                        </div>
+                                        <div className="mt-1.5 h-1.5 w-full bg-white/6 rounded-full overflow-hidden">
+                                            <div
+                                                className="h-full rounded-full bg-gradient-to-r from-emerald-300 to-cyan-300 transition-all duration-300"
+                                                style={{ width: `${(item.count / tagBarMax) * 100}%` }}
+                                            />
+                                        </div>
+                                    </div>
+                                ))}
+                                {!tagBarData.length && <div className="text-sm text-zinc-500">标签数据还在累计中。</div>}
                             </div>
                         </div>
                     </div>
 
-                    <div className="glass-panel p-8 rounded-[32px]">
-                        <div className="flex items-center justify-between gap-4 mb-6">
+                    <div className="glass-panel p-6 lg:p-7 rounded-[32px] h-[660px] flex flex-col">
+                        <div className="flex items-center justify-between gap-4 mb-5">
                             <h2 className="text-sm font-bold uppercase tracking-widest text-zinc-400 flex items-center gap-2">
-                                <StarIcon className="w-4 h-4 text-amber-300" />
-                                高分作品陈列
+                                <ClockIcon className="w-4 h-4 text-sky-300" />
+                                最近在看作品
                             </h2>
-                            <Link href="/anime/atlas" className="text-[10px] font-bold text-zinc-500 hover:text-white transition-colors uppercase tracking-widest">
-                                查看图谱馆
+                            <Link href="/anime/timeline" className="text-[10px] font-bold text-zinc-500 hover:text-white transition-colors uppercase tracking-widest">
+                                查看时间线
                             </Link>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                            {topRated.map((anime: AnimeRecord) => (
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 lg:gap-4 auto-rows-max content-start flex-1 overflow-y-auto pr-1">
+                            {recentWatching.map(({ record, anime }) => (
                                 <Link
-                                    key={anime.id}
-                                    href={`/anime/${anime.id}`}
-                                    className="group rounded-[26px] border border-white/6 bg-white/[0.03] overflow-hidden hover:border-amber-300/20 transition-all"
+                                    key={`recent-${record.id}`}
+                                    href={`/anime/${record.animeId}`}
+                                    className="group rounded-[22px] border border-white/6 bg-white/[0.03] overflow-hidden hover:border-sky-300/20 transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.01]"
                                 >
                                     <div
-                                        className="h-36 bg-zinc-900/70 bg-cover bg-center"
-                                        style={anime.coverUrl ? { backgroundImage: `linear-gradient(180deg, rgba(7,17,15,0.05), rgba(7,17,15,0.88)), url(${anime.coverUrl})` } : undefined}
+                                        className="h-24 bg-zinc-900/70 bg-cover bg-center"
+                                        style={anime?.coverUrl ? { backgroundImage: `linear-gradient(180deg, rgba(7,17,15,0.1), rgba(7,17,15,0.9)), url(${anime.coverUrl})` } : undefined}
                                     />
-                                    <div className="p-4">
-                                        <div className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">Score Highlight</div>
-                                        <div className="mt-1 text-lg text-zinc-100 truncate">{anime.title}</div>
-                                        <div className="text-xs text-zinc-500 truncate">{anime.originalTitle ?? anime.originalWork ?? '未补充原名/原作信息'}</div>
-                                        <div className="mt-3 inline-flex rounded-full border border-amber-300/20 bg-amber-300/10 px-2.5 py-1 text-xs text-amber-100">
-                                            {anime.score?.toFixed(1)}
+                                    <div className="p-3.5">
+                                        <div className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">Recent Watch</div>
+                                        <div className="mt-1 text-base text-zinc-100 truncate">{anime?.title ?? record.animeTitle}</div>
+                                        <div className="text-xs text-zinc-500 truncate">{anime?.originalTitle ?? anime?.originalWork ?? '来自观看历史'}</div>
+                                        <div className="mt-2 flex items-center justify-between gap-2">
+                                            <span className="inline-flex rounded-full border border-sky-300/20 bg-sky-300/10 px-2.5 py-1 text-[11px] text-sky-100">
+                                                第 {record.episode} 集
+                                            </span>
+                                            <span className="text-[11px] text-zinc-500 font-mono">{formatWatchMoment(record.dateObj)}</span>
                                         </div>
                                     </div>
                                 </Link>
                             ))}
-                            {!topRated.length && <div className="text-sm text-zinc-500">还没有评分字段，后续补全后这里会自动丰富。</div>}
+                            {Array.from({ length: Math.max(0, 9 - recentWatching.length) }).map((_, index) => (
+                                <div
+                                    key={`recent-empty-${index}`}
+                                    className="rounded-[22px] border border-dashed border-white/10 bg-white/[0.015] overflow-hidden min-h-[190px]"
+                                >
+                                    <div className="h-24 bg-gradient-to-br from-white/[0.04] to-transparent" />
+                                    <div className="p-3.5">
+                                        <div className="text-[10px] uppercase tracking-[0.24em] text-zinc-600">Waiting Slot</div>
+                                        <div className="mt-2 text-sm text-zinc-400">最近看得太少啦~</div>
+                                        <div className="text-xs text-zinc-600 mt-1">再看几集，这里会自动补满九宫格</div>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>
@@ -584,7 +634,7 @@ export default function Dashboard() {
                     <div className="glass-panel p-7 rounded-[32px]">
                         <h2 className="text-sm font-bold uppercase tracking-widest text-zinc-400 flex items-center gap-2 mb-5">
                             <CalendarDaysIcon className="w-4 h-4 text-sky-300" />
-                            最近首播作品
+                            最近开播作品
                         </h2>
                         <div className="space-y-3">
                             {recentPremiered.map((anime) => (
@@ -596,7 +646,7 @@ export default function Dashboard() {
                                     <span className="text-[10px] text-zinc-500 group-hover:text-sky-200">↗</span>
                                 </Link>
                             ))}
-                            {!recentPremiered.length && <div className="text-sm text-zinc-500">首播字段偏少，暂时没有可展示列表。</div>}
+                            {!recentPremiered.length && <div className="text-sm text-zinc-500">开播字段偏少，暂时没有可展示列表。</div>}
                         </div>
                     </div>
 

@@ -1,9 +1,19 @@
 
 "use client";
 
-export function DonutChart({ data }: { data: { label: string; value: number; color: string }[] }) {
-  const size = 96;
-  const strokeWidth = 12;
+interface DonutChartItem {
+  label: string;
+  value: number;
+  color: string;
+}
+
+interface DonutChartProps {
+  data: DonutChartItem[];
+  size?: number;
+  strokeWidth?: number;
+}
+
+export function DonutChart({ data, size = 96, strokeWidth = 12 }: DonutChartProps) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const total = data.reduce((sum, item) => sum + item.value, 0);
