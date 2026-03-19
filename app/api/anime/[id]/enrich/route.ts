@@ -3,10 +3,11 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { getAnimeRecord, updateAnimeRecord, CreateAnimeDTO } from '@/lib/anime';
 import { enrichAnimeInput } from '@/lib/anime-enrichment';
+import metadataMergePolicy from '@/lib/metadata/merge-policy.js';
 
 type MetadataPatchInput = Partial<CreateAnimeDTO>;
 
-const metadataMergePolicy = require('@/lib/metadata/merge-policy.js') as {
+const { DEFAULT_METADATA_FIELDS, buildMetadataPatch } = metadataMergePolicy as unknown as {
   DEFAULT_METADATA_FIELDS: string[];
   buildMetadataPatch: (
     current: Partial<CreateAnimeDTO>,
@@ -20,8 +21,6 @@ const metadataMergePolicy = require('@/lib/metadata/merge-policy.js') as {
     }
   ) => { patch: Partial<CreateAnimeDTO>; sources: Record<string, string> };
 };
-
-const { DEFAULT_METADATA_FIELDS, buildMetadataPatch } = metadataMergePolicy;
 
 type SessionUser = {
   role?: string;

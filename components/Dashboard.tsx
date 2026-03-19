@@ -22,6 +22,7 @@ import LazyRender from './shared/LazyRender';
 const PieChart = dynamic(() => import('./dashboard/PieChart').then(mod => mod.PieChart), { ssr: false });
 const ActivityFeed = dynamic(() => import('./dashboard/ActivityFeed'), { ssr: false });
 const AdvancedActivityStats = dynamic(() => import('./dashboard/AdvancedActivityStats'), { ssr: false });
+const PREMIERE_PALETTE = ['#5dd6f2', '#56d39c', '#8da6ff', '#f4bf62', '#fb7185', '#a78bfa', '#f97316'] as const;
 
 export default function Dashboard() {
     const { parsedHistory, isLoading: hLoading, isRefreshing: hRefreshing } = useHistoryData();
@@ -208,7 +209,6 @@ export default function Dashboard() {
             .map(([year, count]) => ({ year, count }));
     }, [animeList]);
 
-    const PREMIERE_PALETTE = ['#5dd6f2', '#56d39c', '#8da6ff', '#f4bf62', '#fb7185', '#a78bfa', '#f97316'] as const;
     const premierePieData = useMemo(
         () => premiereByYear.map((item, i) => ({
             label: `${item.year} 年`,

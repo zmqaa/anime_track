@@ -2,12 +2,13 @@ import 'server-only';
 
 import { containsCjkText, uniqueStrings } from './anime-cast';
 import { parseChineseNumberToken, appendSeasonToTitle, stripSeasonToken } from './chinese-parser';
+import aiMetadataSource from './metadata/ai-metadata-source.js';
 import {
   toOptionalString, toOptionalNumber, toOptionalFiniteNumber, toOptionalNonNegativeNumber,
   toOptionalBoolean, toOptionalDateString, toStringArray, toOptionalQuickRecordStatus,
 } from './ai-validation';
 
-const aiMetadataSource = require('./metadata/ai-metadata-source.js') as {
+const { fetchAiAnimeMetadata } = aiMetadataSource as unknown as {
   fetchAiAnimeMetadata: (queryName: string, apiKey?: string) => Promise<{
     title?: string;
     originalTitle?: string;
@@ -437,7 +438,7 @@ export async function enrichAnimeData(queryName: string): Promise<EnrichedAnimeD
     return null;
   }
 
-  const metadata = await aiMetadataSource.fetchAiAnimeMetadata(normalizedQuery, getApiKey());
+  const metadata = await fetchAiAnimeMetadata(normalizedQuery, getApiKey());
   if (!metadata) {
     return null;
   }

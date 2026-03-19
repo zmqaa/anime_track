@@ -3,14 +3,15 @@ import 'server-only';
 import { enrichAnimeData, buildVoiceActorAliases } from './ai';
 import { fetchAnimeMetadataByQueries } from './anime-provider';
 import { uniqueStrings } from './anime-cast';
-import { CreateAnimeDTO } from './anime';
+import type { CreateAnimeDTO } from './anime';
+import metadataMergePolicy from './metadata/merge-policy.js';
 
 type MetadataSourceInput = Partial<CreateAnimeDTO> & {
   description?: string;
   synopsis?: string;
 };
 
-const metadataMergePolicy = require('./metadata/merge-policy.js') as {
+const { DEFAULT_METADATA_FIELDS, applyMetadataPatch, buildMetadataCandidate } = metadataMergePolicy as unknown as {
   DEFAULT_METADATA_FIELDS: string[];
   applyMetadataPatch: (
     current: CreateAnimeDTO,
@@ -29,29 +30,11 @@ const metadataMergePolicy = require('./metadata/merge-policy.js') as {
   ) => { candidate: Partial<CreateAnimeDTO>; source: Record<string, string> };
 };
 
-const { DEFAULT_METADATA_FIELDS, applyMetadataPatch, buildMetadataCandidate } = metadataMergePolicy;
-
 export type AnimeEnrichmentMode = 'create' | 'fill-missing';
 
 export interface AnimeEnrichmentOptions {
   mode?: AnimeEnrichmentMode;
   originalUserTitle?: string;
-}
-
-function isBlank(value: string | undefined | null): boolean {
-  return !value || !value.trim();
-}
-
-function shouldFillNumber(value: number | undefined | null): boolean {
-  return value === undefined || value === null || !Number.isFinite(value) || value <= 0;
-}
-
-function shouldFillArray(value: string[] | undefined | null): boolean {
-  return !Array.isArray(value) || value.length === 0;
-}
-
-function hasPlaceholderCover(value: string | undefined | null): boolean {
-  return !!value && value.includes('placeholder');
 }
 
 function normalizeTitle(value: string | undefined | null): string | undefined {

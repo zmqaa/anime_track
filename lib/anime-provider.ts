@@ -11,7 +11,9 @@ export interface AnimeMetadata {
     isFinished?: boolean;
 }
 
-const providerSource = require('./metadata/provider-source.js') as {
+import providerSource from './metadata/provider-source.js';
+
+const typedProviderSource = providerSource as unknown as {
     fetchAnimeMetadata: (title: string) => Promise<AnimeMetadata | null>;
     fetchAnimeMetadataByQueries: (...queries: Array<string | undefined | null>) => Promise<AnimeMetadata | null>;
 };
@@ -104,7 +106,7 @@ function uniqueValues(values: Array<string | undefined | null>): string[] {
     return result;
 }
 
-function normalizeDate(value: string | undefined): string | undefined {
+export function normalizeDate(value: string | undefined): string | undefined {
     if (!value) {
         return undefined;
     }
@@ -153,7 +155,7 @@ function pickBangumiSubject(subjects: BangumiSubject[], title: string) {
     return subject || subjects[0] || null;
 }
 
-async function fetchBangumiSubject(title: string): Promise<BangumiSubject | null> {
+export async function fetchBangumiSubject(title: string): Promise<BangumiSubject | null> {
     const res = await fetch(`https://api.bgm.tv/search/subject/${encodeURIComponent(title)}?type=2&responseGroup=small&max_results=5`, {
         headers: {
             'User-Agent': USER_AGENT,
@@ -172,7 +174,7 @@ async function fetchBangumiSubject(title: string): Promise<BangumiSubject | null
     return pickBangumiSubject(data.list, title);
 }
 
-async function fetchBangumiCast(subjectId: number): Promise<string[]> {
+export async function fetchBangumiCast(subjectId: number): Promise<string[]> {
     try {
         const res = await fetch(`https://api.bgm.tv/subject/${subjectId}?responseGroup=large`, {
             headers: {
@@ -204,7 +206,7 @@ async function fetchBangumiCast(subjectId: number): Promise<string[]> {
     }
 }
 
-async function fetchJikanSearch(title: string): Promise<JikanAnime | null> {
+export async function fetchJikanSearch(title: string): Promise<JikanAnime | null> {
     const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=1`);
     if (!res.ok) {
         return null;
@@ -218,7 +220,7 @@ async function fetchJikanSearch(title: string): Promise<JikanAnime | null> {
     return data.data[0];
 }
 
-async function fetchJikanCast(malId: number): Promise<string[]> {
+export async function fetchJikanCast(malId: number): Promise<string[]> {
     try {
         const res = await fetch(`https://api.jikan.moe/v4/anime/${malId}/characters`);
         if (!res.ok) {
@@ -247,10 +249,10 @@ async function fetchJikanCast(malId: number): Promise<string[]> {
 }
 
 export async function fetchAnimeMetadata(title: string): Promise<AnimeMetadata | null> {
-    return providerSource.fetchAnimeMetadata(title);
+    return typedProviderSource.fetchAnimeMetadata(title);
 }
 
 export async function fetchAnimeMetadataByQueries(...queries: Array<string | undefined | null>): Promise<AnimeMetadata | null> {
-    return providerSource.fetchAnimeMetadataByQueries(...queries);
+    return typedProviderSource.fetchAnimeMetadataByQueries(...queries);
 }
 
