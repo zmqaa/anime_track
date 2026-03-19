@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo } from 'react';
 import {
     ArrowTrendingUpIcon,
     CalendarDaysIcon,
@@ -14,78 +14,14 @@ import {
 import { useAnimeData } from '@/hooks/useAnimeData';
 import { useHistoryData } from '@/hooks/useHistoryData';
 import { AnimeRecord, AnimeStatus, statusLabels, statusColors } from '@/lib/dashboard-types';
+import { formatPremiere, formatUpdateDate, formatWatchMoment } from '@/lib/formatters';
 import DashboardHeader from './dashboard/DashboardHeader';
+import LazyRender from './shared/LazyRender';
 
 // 动态导入组件，减少初始包体积
 const PieChart = dynamic(() => import('./dashboard/PieChart').then(mod => mod.PieChart), { ssr: false });
 const ActivityFeed = dynamic(() => import('./dashboard/ActivityFeed'), { ssr: false });
 const AdvancedActivityStats = dynamic(() => import('./dashboard/AdvancedActivityStats'), { ssr: false });
-
-function LazyRender({
-    children,
-    fallback,
-    rootMargin = '200px',
-}: {
-    children: React.ReactNode;
-    fallback?: React.ReactNode;
-    rootMargin?: string;
-}) {
-    const [isVisible, setIsVisible] = useState(false);
-    const ref = useRef<HTMLDivElement | null>(null);
-
-    useEffect(() => {
-        if (isVisible) return;
-        const node = ref.current;
-        if (!node) return;
-
-        if (!('IntersectionObserver' in window)) {
-            setIsVisible(true);
-            return;
-        }
-
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (entry.isIntersecting) {
-                    setIsVisible(true);
-                    observer.disconnect();
-                }
-            },
-            { rootMargin }
-        );
-
-        observer.observe(node);
-        return () => observer.disconnect();
-    }, [isVisible, rootMargin]);
-
-    return (
-        <div ref={ref}>
-            {isVisible ? children : fallback ?? <div className="glass-panel rounded-[24px] h-48 animate-pulse" />}
-        </div>
-    );
-}
-
-function formatPremiere(value?: string) {
-    if (!value) return '未补充';
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return value;
-    return new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: 'short' }).format(date);
-}
-
-function formatUpdateDate(value: string) {
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return value;
-    return new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(date);
-}
-
-function formatWatchMoment(value: Date) {
-    if (Number.isNaN(value.getTime())) return '时间未知';
-    return new Intl.DateTimeFormat('zh-CN', {
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-    }).format(value);
-}
 
 export default function Dashboard() {
     const { parsedHistory, isLoading: hLoading, isRefreshing: hRefreshing } = useHistoryData();
@@ -226,7 +162,7 @@ export default function Dashboard() {
         const fields = [
             { label: '原名', count: animeList.filter((anime) => Boolean(anime.originalTitle)).length },
             { label: '评分', count: animeList.filter((anime) => typeof anime.score === 'number').length },
-            { label: '原作', count: animeList.filter((anime) => Boolean(anime.originalWork)).length },
+            { label: '集数', count: animeList.filter((anime) => typeof anime.totalEpisodes === 'number' && anime.totalEpisodes > 0).length },
             { label: '声优', count: animeList.filter((anime) => Array.isArray(anime.cast) && anime.cast.length > 0).length },
             { label: '首播', count: animeList.filter((anime) => Boolean(anime.premiereDate)).length },
             { label: '简介', count: animeList.filter((anime) => Boolean(anime.summary)).length },
@@ -244,7 +180,7 @@ export default function Dashboard() {
             const filled = [
                 anime.originalTitle,
                 anime.score,
-                anime.originalWork,
+                anime.totalEpisodes,
                 Array.isArray(anime.cast) && anime.cast.length > 0 ? anime.cast.join(',') : undefined,
                 anime.premiereDate,
                 anime.summary,
@@ -354,7 +290,7 @@ export default function Dashboard() {
                                 <div className="mt-4 space-y-4">
                                     <div>
                                         <h3 className="text-2xl font-display text-zinc-100 leading-snug">{heroAnime.title}</h3>
-                                        <p className="text-sm text-zinc-400 mt-1 truncate">{heroAnime.originalTitle ?? heroAnime.originalWork ?? '尚未补充原名与原作信息'}</p>
+                                        <p className="text-sm text-zinc-400 mt-1 truncate">{heroAnime.originalTitle ?? '尚未补充原名'}</p>
                                     </div>
                                     <div className="grid grid-cols-2 gap-3">
                                         <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
@@ -372,7 +308,7 @@ export default function Dashboard() {
                                         {heroAnime.summary ?? '这部作品还没有补充摘要。可以在详情页使用 AI 补充，首页会自动展示更丰富信息。'}
                                     </div>
                                     <div className="flex items-center justify-between text-xs text-zinc-500">
-                                        <span>最后更新</span>
+                                        <span>最近编辑</span>
                                         <span>{formatUpdateDate(heroAnime.updatedAt)}</span>
                                     </div>
                                 </div>
@@ -603,7 +539,7 @@ export default function Dashboard() {
                                     <div className="p-3.5">
                                         <div className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">Recent Watch</div>
                                         <div className="mt-1 text-base text-zinc-100 truncate">{anime?.title ?? record.animeTitle}</div>
-                                        <div className="text-xs text-zinc-500 truncate">{anime?.originalTitle ?? anime?.originalWork ?? '来自观看历史'}</div>
+                                        <div className="text-xs text-zinc-500 truncate">{anime?.originalTitle ?? '来自观看历史'}</div>
                                         <div className="mt-2 flex items-center justify-between gap-2">
                                             <span className="inline-flex rounded-full border border-sky-300/20 bg-sky-300/10 px-2.5 py-1 text-[11px] text-sky-100">
                                                 第 {record.episode} 集
@@ -641,7 +577,7 @@ export default function Dashboard() {
                                 <Link key={anime.id} href={`/anime/${anime.id}`} className="group flex items-center justify-between gap-3 rounded-[20px] border border-white/5 bg-white/[0.03] px-4 py-3 hover:border-sky-300/20 transition-all">
                                     <div className="min-w-0">
                                         <div className="text-sm text-zinc-200 truncate">{anime.title}</div>
-                                        <div className="text-xs text-zinc-500 truncate">{formatPremiere(anime.premiereDate)} · {anime.originalWork ?? '未补充原作'}</div>
+                                        <div className="text-xs text-zinc-500 truncate">{formatPremiere(anime.premiereDate)} · {anime.totalEpisodes ? `${anime.totalEpisodes} 集` : '集数未补充'}</div>
                                     </div>
                                     <span className="text-[10px] text-zinc-500 group-hover:text-sky-200">↗</span>
                                 </Link>

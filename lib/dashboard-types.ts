@@ -13,7 +13,6 @@ export interface AnimeRecord {
   durationMinutes?: number;
   status: AnimeStatus;
   tags?: string[];
-  originalWork?: string;
   cast?: string[];
   castAliases?: string[];
   summary?: string;
@@ -23,6 +22,7 @@ export interface AnimeRecord {
   isFinished?: boolean;
   createdAt: string;
   updatedAt: string;
+  lastWatchedAt?: string;
 }
 
 export interface WatchHistoryRecord {

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from '@/lib/auth';
-import { listAnimeRecords, createAnimeRecord, CreateAnimeDTO, AnimeStatus } from '@/lib/anime';
+import { listAnimeRecordsWithLastWatched, createAnimeRecord, CreateAnimeDTO, AnimeStatus } from '@/lib/anime';
 import { normalizeStringArray } from '@/lib/anime-cast';
 import { enrichAnimeInput } from '@/lib/anime-enrichment';
 
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   const status = searchParams.get('status') as AnimeStatus | undefined;
   
   try {
-    const list = await listAnimeRecords(status);
+    const list = await listAnimeRecordsWithLastWatched(status);
     return NextResponse.json(list);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : '读取失败';
@@ -41,7 +41,6 @@ export async function POST(request: NextRequest) {
         notes: json.notes,
         durationMinutes: json.durationMinutes,
         tags: normalizeStringArray(json.tags),
-        originalWork: json.originalWork,
         cast: normalizeStringArray(json.cast),
         castAliases: normalizeStringArray(json.castAliases),
         summary: json.summary,

@@ -15,7 +15,6 @@ CREATE TABLE IF NOT EXISTS anime (
     start_date DATE,
     end_date DATE,
     premiere_date DATE,
-    original_work VARCHAR(255),
     cast JSON,
     cast_aliases JSON,
     isFinished TINYINT(1) DEFAULT 0,

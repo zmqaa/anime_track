@@ -1,6 +1,25 @@
 import 'server-only';
 
 import { containsCjkText, uniqueStrings } from './anime-cast';
+import { parseChineseNumberToken, appendSeasonToTitle, stripSeasonToken } from './chinese-parser';
+import {
+  toOptionalString, toOptionalNumber, toOptionalFiniteNumber, toOptionalNonNegativeNumber,
+  toOptionalBoolean, toOptionalDateString, toStringArray, toOptionalQuickRecordStatus,
+} from './ai-validation';
+
+const aiMetadataSource = require('./metadata/ai-metadata-source.js') as {
+  fetchAiAnimeMetadata: (queryName: string, apiKey?: string) => Promise<{
+    title?: string;
+    originalTitle?: string;
+    totalEpisodes?: number;
+    durationMinutes?: number;
+    summary?: string;
+    tags?: string[];
+    premiereDate?: string;
+    isFinished?: boolean;
+    coverUrl?: string;
+  } | null>;
+};
 
 const DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions';
 const DEEPSEEK_MODEL = 'deepseek-chat';
@@ -12,6 +31,7 @@ export interface EnrichedAnimeData {
   durationMinutes?: number;
   synopsis?: string;
   tags?: string[];
+  premiereDate?: string;
   isFinished?: boolean;
   coverUrl?: string;
 }
@@ -24,6 +44,39 @@ export interface ParsedWatchInput {
   watchedAt?: string;
 }
 
+export type ParsedQuickRecordStatus = 'watching' | 'completed' | 'dropped' | 'plan_to_watch';
+export type ParsedQuickRecordTitleKind = 'official' | 'generic-season';
+
+export interface ParsedQuickRecordIntent {
+  animeTitle: string;
+  originalTitle?: string;
+  titleKind?: ParsedQuickRecordTitleKind;
+  season?: number;
+  episode?: number;
+  progress?: number;
+  watchedAt?: string;
+  startDate?: string;
+  endDate?: string;
+  premiereDate?: string;
+  status?: ParsedQuickRecordStatus;
+  score?: number;
+  notes?: string;
+  tags?: string[];
+  totalEpisodes?: number;
+  durationMinutes?: number;
+  summary?: string;
+  coverUrl?: string;
+  cast?: string[];
+  castAliases?: string[];
+  isFinished?: boolean;
+  isHistorical?: boolean;
+  rewatchTag?: string;
+}
+
+export interface ParsedQuickRecordBatch {
+  records: ParsedQuickRecordIntent[];
+}
+
 type DeepSeekMessage = {
   role: 'system' | 'user' | 'assistant';
   content: string;
@@ -33,120 +86,170 @@ function getApiKey(): string {
   return process.env.DEEPSEEK_API_KEY?.trim() || '';
 }
 
-function toOptionalString(value: unknown): string | undefined {
-  if (typeof value !== 'string') {
-    return undefined;
-  }
-
-  const trimmed = value.trim();
-  return trimmed || undefined;
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-function toOptionalNumber(value: unknown): number | undefined {
-  if (typeof value === 'number' && Number.isFinite(value) && value > 0) {
-    return value;
+function hasHistoricalCue(text: string): boolean {
+  return /(以前|之前|很久前|早就|小时候|当年|曾经)/.test(text);
+}
+
+function hasExplicitDateCue(text: string): boolean {
+  return /(今天|昨天|前天|昨晚|今晚|刚刚|刚才|\d{4}[年\/-]\d{1,2}[月\/-]\d{1,2}|\d{1,2}[月\/-]\d{1,2})/.test(text);
+}
+
+function hasSeriesCompletedCue(text: string): boolean {
+  return /(都看完了|都补完了|全看完了|全部看完了|全补完了|全部补完了|看完了|补完了|追完了)/.test(text);
+}
+
+function hasEpisodeCompletionCue(text: string): boolean {
+  return /(看完了|补完了|追完了)\s*第\s*[0-9一二三四五六七八九十百零两〇]+\s*[集话話]/.test(text);
+}
+
+function expandInclusiveRange(start: number, end: number): number[] {
+  if (!Number.isFinite(start) || !Number.isFinite(end) || start <= 0 || end <= 0) {
+    return [];
   }
 
-  if (typeof value === 'string') {
-    const parsed = Number(value);
-    if (Number.isFinite(parsed) && parsed > 0) {
-      return parsed;
+  const result: number[] = [];
+  const step = start <= end ? 1 : -1;
+  for (let current = start; step > 0 ? current <= end : current >= end; current += step) {
+    result.push(current);
+  }
+
+  return result;
+}
+
+function extractSeasonNumbersFromTextForTitle(inputText: string, animeTitle: string): number[] {
+  const baseTitle = stripSeasonToken(animeTitle);
+  if (!baseTitle) {
+    return [];
+  }
+
+  const escapedTitle = escapeRegExp(baseTitle).replace(/\s+/g, '\\s*');
+  const patterns = [
+    new RegExp(`${escapedTitle}\\s*第\\s*([0-9一二三四五六七八九十百零两〇]+)\\s*(?:到|至|[-~～])\\s*第?\\s*([0-9一二三四五六七八九十百零两〇]+)\\s*季`),
+    new RegExp(`${escapedTitle}\\s*第\\s*([0-9一二三四五六七八九十百零两〇]+)\\s*(?:、|和|及|跟|,|，)?\\s*第?\\s*([0-9一二三四五六七八九十百零两〇]+)\\s*季`),
+  ];
+
+  for (const pattern of patterns) {
+    const match = inputText.match(pattern);
+    if (!match) {
+      continue;
     }
+
+    const first = parseChineseNumberToken(match[1]);
+    const second = parseChineseNumberToken(match[2]);
+    if (!first || !second) {
+      continue;
+    }
+
+    const expanded = pattern.source.includes('到|至') ? expandInclusiveRange(first, second) : uniqueStrings([String(first), String(second)]).map(Number);
+    return expanded.filter((item) => Number.isFinite(item) && item > 0);
+  }
+
+  return [];
+}
+
+function normalizeQuickRecordTitleKind(value: unknown): ParsedQuickRecordTitleKind | undefined {
+  const normalized = toOptionalString(value);
+  if (normalized === 'official' || normalized === 'generic-season') {
+    return normalized;
   }
 
   return undefined;
 }
 
-function toOptionalBoolean(value: unknown): boolean | undefined {
-  return typeof value === 'boolean' ? value : undefined;
+function normalizeQuickRecordTitle(
+  animeTitleRaw: string | undefined,
+  season: number | undefined,
+  titleKind: ParsedQuickRecordTitleKind | undefined,
+): string | undefined {
+  const normalizedTitle = toOptionalString(animeTitleRaw);
+  if (!normalizedTitle) {
+    return undefined;
+  }
+
+  if (titleKind === 'official') {
+    return normalizedTitle;
+  }
+
+  return appendSeasonToTitle(normalizedTitle, season);
 }
 
-function toOptionalDateString(value: unknown): string | undefined {
-  if (typeof value !== 'string') {
-    return undefined;
+function applyGlobalQuickRecordHints(inputText: string, batch: ParsedQuickRecordBatch): ParsedQuickRecordBatch {
+  if (!Array.isArray(batch.records) || batch.records.length === 0) {
+    return batch;
   }
 
-  const trimmed = value.trim();
-  if (!trimmed) {
-    return undefined;
+  const historical = hasHistoricalCue(inputText);
+  const explicitDate = hasExplicitDateCue(inputText);
+  const seriesCompleted = hasSeriesCompletedCue(inputText);
+  const episodeCompletion = hasEpisodeCompletionCue(inputText);
+  const shouldForceCompleted = seriesCompleted && !episodeCompletion;
+
+  const hintedRecords = batch.records.map((record) => {
+    const next: ParsedQuickRecordIntent = {
+      ...record,
+      animeTitle: normalizeQuickRecordTitle(record.animeTitle, record.season, record.titleKind) || record.animeTitle,
+    };
+
+    if (historical && next.isHistorical === undefined) {
+      next.isHistorical = true;
+    }
+
+    if (historical && !explicitDate) {
+      next.watchedAt = undefined;
+      next.startDate = undefined;
+      next.endDate = undefined;
+    }
+
+    if (shouldForceCompleted && (!next.status || next.status === 'watching')) {
+      next.status = 'completed';
+    }
+
+    return next;
+  });
+
+  const groups = new Map<string, ParsedQuickRecordIntent[]>();
+  for (const record of hintedRecords) {
+    const key = stripSeasonToken(record.animeTitle) || record.animeTitle;
+    if (!groups.has(key)) {
+      groups.set(key, []);
+    }
+
+    groups.get(key)?.push(record);
   }
 
-  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
-    return trimmed;
-  }
-
-  const parsed = new Date(trimmed);
-  if (Number.isNaN(parsed.getTime())) {
-    return undefined;
-  }
-
-  const year = parsed.getFullYear();
-  const month = String(parsed.getMonth() + 1).padStart(2, '0');
-  const day = String(parsed.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
-function toStringArray(value: unknown): string[] | undefined {
-  if (!Array.isArray(value)) {
-    return undefined;
-  }
-
-  const normalized = uniqueStrings(value.map((item) => (typeof item === 'string' ? item : String(item ?? ''))));
-  return normalized.length > 0 ? normalized : undefined;
-}
-
-function parseChineseNumberToken(token: string): number | undefined {
-  const normalized = token.trim();
-  if (!normalized) {
-    return undefined;
-  }
-
-  if (/^\d+$/.test(normalized)) {
-    const parsed = Number(normalized);
-    return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
-  }
-
-  const digitMap: Record<string, number> = {
-    '零': 0,
-    '〇': 0,
-    '一': 1,
-    '二': 2,
-    '两': 2,
-    '三': 3,
-    '四': 4,
-    '五': 5,
-    '六': 6,
-    '七': 7,
-    '八': 8,
-    '九': 9,
-  };
-
-  let value = 0;
-  let current = 0;
-
-  for (const char of normalized) {
-    if (digitMap[char] !== undefined) {
-      current = digitMap[char];
+  const expandedRecords: ParsedQuickRecordIntent[] = [];
+  for (const [baseTitle, records] of groups.entries()) {
+    const explicitSeasons = extractSeasonNumbersFromTextForTitle(inputText, baseTitle);
+    if (explicitSeasons.length > 1) {
+      const template = records[0];
+      for (const season of explicitSeasons) {
+        expandedRecords.push({
+          ...template,
+          season,
+          titleKind: 'generic-season',
+          animeTitle: appendSeasonToTitle(baseTitle, season),
+        });
+      }
       continue;
     }
 
-    if (char === '十') {
-      value += (current || 1) * 10;
-      current = 0;
-      continue;
-    }
-
-    if (char === '百') {
-      value += (current || 1) * 100;
-      current = 0;
-      continue;
-    }
-
-    return undefined;
+    expandedRecords.push(...records);
   }
 
-  value += current;
-  return value > 0 ? value : undefined;
+  const deduped = Array.from(
+    new Map(
+      expandedRecords.map((record) => [
+        `${record.animeTitle}::${record.originalTitle || ''}::${record.status || ''}::${record.isHistorical ? '1' : '0'}`,
+        record,
+      ])
+    ).values()
+  );
+
+  return { records: deduped };
 }
 
 function cleanWatchSentenceTitle(text: string): string {
@@ -158,6 +261,7 @@ function cleanWatchSentenceTitle(text: string): string {
     .replace(/第\s*[0-9一二三四五六七八九十百零两〇]+\s*[集话話]/gi, ' ')
     .replace(/[，。,.!！?？]/g, ' ')
     .replace(/\s+/g, ' ')
+    .replace(/\s*的\s*$/g, '')
     .trim();
 }
 
@@ -193,11 +297,97 @@ function parseWatchInputFallback(inputText: string): ParsedWatchInput | null {
     return null;
   }
 
+  animeTitle = appendSeasonToTitle(animeTitle, season);
+
   return {
     animeTitle,
     season,
     episode,
   };
+}
+
+function parseQuickRecordBatchFallback(inputText: string): ParsedQuickRecordBatch {
+  const single = parseWatchInputFallback(inputText);
+  if (!single) {
+    return { records: [] };
+  }
+
+  return {
+    records: [
+      {
+        animeTitle: single.animeTitle,
+        originalTitle: single.originalTitle,
+        titleKind: single.season ? 'generic-season' : undefined,
+        season: single.season,
+        episode: single.episode,
+        progress: single.episode,
+        watchedAt: single.watchedAt,
+        status: single.episode ? 'watching' : undefined,
+      },
+    ],
+  };
+}
+
+function normalizeQuickRecordIntent(value: unknown): ParsedQuickRecordIntent | null {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const payload = value as Record<string, unknown>;
+  const season = toOptionalNumber(payload.season);
+  const titleKind = normalizeQuickRecordTitleKind(payload.titleKind);
+  const animeTitleRaw =
+    toOptionalString(payload.animeTitle) ||
+    toOptionalString(payload.title) ||
+    toOptionalString(payload.officialTitle);
+  const animeTitle = normalizeQuickRecordTitle(animeTitleRaw, season, titleKind);
+
+  if (!animeTitle) {
+    return null;
+  }
+
+  const episode = toOptionalNumber(payload.episode);
+  const progress = toOptionalNonNegativeNumber(payload.progress) ?? episode;
+
+  return {
+    animeTitle,
+    originalTitle: toOptionalString(payload.originalTitle),
+    titleKind,
+    season,
+    episode,
+    progress,
+    watchedAt: toOptionalDateString(payload.watchedAt),
+    startDate: toOptionalDateString(payload.startDate),
+    endDate: toOptionalDateString(payload.endDate),
+    premiereDate: toOptionalDateString(payload.premiereDate),
+    status: toOptionalQuickRecordStatus(payload.status),
+    score: toOptionalFiniteNumber(payload.score),
+    notes: toOptionalString(payload.notes),
+    tags: toStringArray(payload.tags),
+    totalEpisodes: toOptionalNumber(payload.totalEpisodes),
+    durationMinutes: toOptionalNumber(payload.durationMinutes),
+    summary: toOptionalString(payload.summary),
+    coverUrl: toOptionalString(payload.coverUrl),
+    cast: toStringArray(payload.cast),
+    castAliases: toStringArray(payload.castAliases),
+    isFinished: toOptionalBoolean(payload.isFinished),
+    isHistorical: toOptionalBoolean(payload.isHistorical),
+    rewatchTag: toOptionalString(payload.rewatchTag),
+  };
+}
+
+function normalizeQuickRecordBatchPayload(payload: Record<string, unknown>): ParsedQuickRecordBatch {
+  const rawRecords = Array.isArray(payload.records)
+    ? payload.records
+    : payload.record
+      ? [payload.record]
+      : ((payload.animeTitle || payload.title || payload.officialTitle) ? [payload] : []);
+
+  const records = rawRecords
+    .map(normalizeQuickRecordIntent)
+    .filter((item): item is ParsedQuickRecordIntent => Boolean(item));
+
+  return { records };
 }
 
 async function requestDeepSeekJson<T>(messages: DeepSeekMessage[], temperature = 0.2): Promise<T | null> {
@@ -247,54 +437,21 @@ export async function enrichAnimeData(queryName: string): Promise<EnrichedAnimeD
     return null;
   }
 
-  const payload = await requestDeepSeekJson<Record<string, unknown>>(
-    [
-      {
-        role: 'system',
-        content: '你是动漫资料整理助手，只输出 JSON，不输出解释。信息不确定时宁可留空，不要编造。',
-      },
-      {
-        role: 'user',
-        content: `
-请识别这部动画，并返回 JSON。
-
-原始名字：${normalizedQuery}
-
-返回结构：
-{
-  "officialTitle": "标准简体中文标题",
-  "originalTitle": "原始标题，可为空",
-  "totalEpisodes": 12,
-  "durationMinutes": 24,
-  "synopsis": "简体中文简介",
-  "tags": ["校园", "喜剧"],
-  "isFinished": true,
-  "coverUrl": null
-}
-
-如果无法识别，也返回同结构，但未知字段用 null 或空数组。`,
-      },
-    ],
-    0.1
-  );
-
-  if (!payload) {
+  const metadata = await aiMetadataSource.fetchAiAnimeMetadata(normalizedQuery, getApiKey());
+  if (!metadata) {
     return null;
   }
 
-  const officialTitle = toOptionalString(payload.officialTitle) || normalizedQuery;
-  const synopsis = toOptionalString(payload.synopsis);
-  const tags = toStringArray(payload.tags);
-
   return {
-    officialTitle,
-    originalTitle: toOptionalString(payload.originalTitle),
-    totalEpisodes: toOptionalNumber(payload.totalEpisodes),
-    durationMinutes: toOptionalNumber(payload.durationMinutes),
-    synopsis,
-    tags,
-    isFinished: toOptionalBoolean(payload.isFinished),
-    coverUrl: toOptionalString(payload.coverUrl),
+    officialTitle: metadata.title || normalizedQuery,
+    originalTitle: metadata.originalTitle,
+    totalEpisodes: metadata.totalEpisodes,
+    durationMinutes: metadata.durationMinutes,
+    synopsis: metadata.summary,
+    tags: metadata.tags,
+    premiereDate: metadata.premiereDate,
+    isFinished: metadata.isFinished,
+    coverUrl: metadata.coverUrl,
   };
 }
 
@@ -338,53 +495,107 @@ export async function buildVoiceActorAliases(cast: string[], existingAliases: st
   return uniqueStrings([...baseAliases, ...aiAliases]);
 }
 
-export async function parseWatchInput(inputText: string): Promise<ParsedWatchInput | null> {
+export async function parseQuickRecordBatch(inputText: string): Promise<ParsedQuickRecordBatch> {
   const normalizedText = inputText.trim();
   if (!normalizedText) {
-    return null;
+    return { records: [] };
   }
 
   const payload = await requestDeepSeekJson<Record<string, unknown>>(
     [
       {
         role: 'system',
-        content: '你是追番日志解析助手，只输出 JSON，不输出解释。',
+        content: '你是动漫观看记录结构化助手，只输出 JSON，不输出解释。未知信息留空，不要编造。',
       },
       {
         role: 'user',
         content: `
-请把这句话解析成追番记录：${normalizedText}
+请把这句话解析成动漫观看记录：${normalizedText}
 
 输出 JSON：
 {
-  "animeTitle": "标准中文标题，必须",
-  "originalTitle": "原名，可空",
-  "season": 1,
-  "episode": 1,
-  "watchedAt": "YYYY-MM-DD，可空"
+  "records": [
+    {
+      "animeTitle": "标准中文标题，必须；优先使用该动画条目的官方中文标题",
+      "originalTitle": "原名，可空",
+      "titleKind": "official|generic-season|null",
+      "season": 1,
+      "episode": 1,
+      "progress": 1,
+      "watchedAt": "YYYY-MM-DD，可空",
+      "startDate": "YYYY-MM-DD，可空",
+      "endDate": "YYYY-MM-DD，可空",
+      "premiereDate": "YYYY-MM-DD，可空",
+      "status": "watching|completed|dropped|plan_to_watch|null",
+      "score": null,
+      "notes": null,
+      "tags": [],
+      "totalEpisodes": null,
+      "durationMinutes": null,
+      "summary": null,
+      "coverUrl": null,
+      "cast": [],
+      "castAliases": [],
+      "isFinished": null,
+      "isHistorical": false,
+      "rewatchTag": null
+    }
+  ]
 }
 
 规则：
-1. 如果句子里有季数或集数，尽量提取成数字。
-2. 如果日期没提到，watchedAt 返回 null。
-3. 识别不出来时，animeTitle 返回 null。`,
+1. 一句话里如果明确提到多部作品或多条记录，拆成多个 records。
+2. 如果出现“第一第二季 / 第一到第二季 / 第一、第二季”，必须拆成多个 seasons 对应的 records，不能只保留一个季。
+3. animeTitle 必须对应“具体动画条目”的标准中文名，不是原作总标题。
+4. 如果该季或续作有稳定通行的官方中文副标题，直接使用官方标题，例如“南家三姐妹 再来一碗”“南家三姐妹 欢迎回来”；此时 titleKind=official，并且不要把标题改写成“第X季”。
+5. 只有在无法确定该季官方中文副标题时，才使用“基础标题 第X季”；此时 titleKind=generic-season。
+6. season 可以填写，但不要因为填了 season 就把官方标题强行改成“第X季”。
+7. 只有用户明确提到的信息才填写；不知道就用 null、空字符串或空数组，不要补全设定。
+8. “看了第一集”可填写 episode=1、progress=1、status=watching。
+9. “看完了、补完了、全看完了”表示整季或整部看完时，填写 status=completed；但“看完了第一集”仍然是单集观看，不是 completed。
+10. “以前、之前、小时候、很久前、早就”这类表述，isHistorical=true；没给具体日期时 watchedAt、startDate、endDate 都留空。
+11. “二刷、三刷、重刷、重温、再刷”填到 rewatchTag。
+12. 不要凭常识生成简介、封面、声优、总集数、时长、标签；这些后续会再补全。
+13. 完全识别不出来时返回 {"records": []}。
+
+示例：
+- “我以前看完了我心里危险的东西第一第二季，还有阴阳眼见子” 应拆成 3 条：我心里危险的东西 第一季、我心里危险的东西 第二季、看得见的女孩；三条都应 isHistorical=true 且 status=completed。
+- “我今天看了放学后海堤日记第一集” 只返回 1 条，status=watching，episode=1，progress=1。
+- “我以前看了南家三姐妹第二季” 应优先返回“南家三姐妹 再来一碗”，season=2，titleKind=official；只有不能确认官方季名时才退回“南家三姐妹 第二季”。`,
       },
     ],
     0.1
   );
 
-  if (payload) {
-    const animeTitle = toOptionalString(payload.animeTitle) || toOptionalString(payload.title);
-    if (animeTitle) {
-      return {
-        animeTitle,
-        originalTitle: toOptionalString(payload.originalTitle),
-        season: toOptionalNumber(payload.season),
-        episode: toOptionalNumber(payload.episode),
-        watchedAt: toOptionalDateString(payload.watchedAt),
-      };
-    }
+  if (!payload) {
+    return applyGlobalQuickRecordHints(normalizedText, parseQuickRecordBatchFallback(normalizedText));
   }
 
-  return parseWatchInputFallback(normalizedText);
+  const normalized = applyGlobalQuickRecordHints(normalizedText, normalizeQuickRecordBatchPayload(payload));
+  if (normalized.records.length > 0) {
+    return normalized;
+  }
+
+  return applyGlobalQuickRecordHints(normalizedText, parseQuickRecordBatchFallback(normalizedText));
+}
+
+export async function parseWatchInput(inputText: string): Promise<ParsedWatchInput | null> {
+  const normalizedText = inputText.trim();
+  if (!normalizedText) {
+    return null;
+  }
+
+  const batch = await parseQuickRecordBatch(normalizedText);
+  const first = batch.records[0];
+  if (!first) {
+    return null;
+  }
+
+  return {
+    animeTitle: first.animeTitle,
+    originalTitle: first.originalTitle,
+    season: first.season,
+    episode: first.episode ?? first.progress,
+    watchedAt: first.watchedAt ?? first.endDate ?? first.startDate,
+  };
 }

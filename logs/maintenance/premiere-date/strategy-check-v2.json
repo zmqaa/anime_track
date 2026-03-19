@@ -1,0 +1,140 @@
+{
+  "startedAt": "2026-03-18T09:49:20.384Z",
+  "finishedAt": "2026-03-18T09:49:31.571Z",
+  "mode": "dry-run",
+  "options": {
+    "force": true,
+    "limit": null,
+    "delay": 900,
+    "ids": [
+      99,
+      141,
+      156,
+      98
+    ],
+    "ai": true,
+    "minConfidence": 0.75,
+    "logFile": "logs\\maintenance\\premiere-date\\strategy-check-v2.json"
+  },
+  "summary": {
+    "loadedCount": 143,
+    "selectedCount": 4,
+    "changedCount": 4,
+    "skippedCount": 0,
+    "errorCount": 0,
+    "providerSelectedCount": 3,
+    "aiSelectedCount": 1,
+    "aiCallCount": 1
+  },
+  "entries": [
+    {
+      "id": 98,
+      "title": "漫画女孩",
+      "originalTitle": null,
+      "beforePremiereDate": "1977-01-01",
+      "queries": [
+        "漫画女孩"
+      ],
+      "provider": {
+        "query": "漫画女孩",
+        "premiereDate": "2018-04-05",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "漫画女孩"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "dry-run",
+      "source": "provider",
+      "afterPremiereDate": "2018-04-05",
+      "reason": "dry_run_preview"
+    },
+    {
+      "id": 156,
+      "title": "某科学的超电磁炮",
+      "originalTitle": null,
+      "beforePremiereDate": "1978-01-01",
+      "queries": [
+        "某科学的超电磁炮"
+      ],
+      "provider": {
+        "query": "某科学的超电磁炮",
+        "premiereDate": "2009-10-02",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "某科学的超电磁炮"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "dry-run",
+      "source": "provider",
+      "afterPremiereDate": "2009-10-02",
+      "reason": "dry_run_preview"
+    },
+    {
+      "id": 141,
+      "title": "Love Live! 超级明星!!",
+      "originalTitle": null,
+      "beforePremiereDate": "1985-09-01",
+      "queries": [
+        "Love Live! 超级明星!!"
+      ],
+      "provider": {
+        "query": "Love Live! 超级明星!!",
+        "premiereDate": null,
+        "premiereDateSource": null,
+        "decision": "missing_date"
+      },
+      "ai": {
+        "used": true,
+        "premiereDate": "2021-07-11",
+        "confidence": 0.9,
+        "decision": "accepted"
+      },
+      "outcome": "dry-run",
+      "source": "ai",
+      "afterPremiereDate": "2021-07-11",
+      "reason": "dry_run_preview"
+    },
+    {
+      "id": 99,
+      "title": "白圣女与黑牧师",
+      "originalTitle": null,
+      "beforePremiereDate": "2010-03-24",
+      "queries": [
+        "白圣女与黑牧师"
+      ],
+      "provider": {
+        "query": "白圣女与黑牧师",
+        "premiereDate": "2023-07-12",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "白圣女与黑牧师"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "dry-run",
+      "source": "provider",
+      "afterPremiereDate": "2023-07-12",
+      "reason": "dry_run_preview"
+    }
+  ]
+}

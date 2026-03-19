@@ -14,6 +14,8 @@
     "db:export-anime-seed": "node scripts/maintenance/export_anime_seed.js",
     "anime:backfill-metadata": "node scripts/maintenance/backfill_anime_metadata.js",
     "anime:backfill-metadata:write": "node scripts/maintenance/backfill_anime_metadata.js --write",
+    "anime:backfill-premiere-date": "node scripts/maintenance/backfill_premiere_date.js",
+    "anime:backfill-premiere-date:write": "node scripts/maintenance/backfill_premiere_date.js --write",
     "anime:backfill-cast": "node scripts/maintenance/backfill_anime_cast.js",
     "anime:backfill-cast:write": "node scripts/maintenance/backfill_anime_cast.js --write"
   },

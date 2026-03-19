@@ -1,16 +1,20 @@
 const path = require('path');
 const dotenv = require('dotenv');
 const mysql = require('mysql2/promise');
+const { fetchAnimeMetadataByQueriesDetailed } = require('../../lib/metadata/provider-source.js');
+const { getDeepSeekApiKey, fetchAiAnimeMetadata } = require('../../lib/metadata/ai-metadata-source.js');
+const {
+  ALL_METADATA_FIELDS,
+  DEFAULT_METADATA_FIELDS,
+  buildMetadataCandidate,
+  buildMetadataPatch,
+  isMetadataFieldMissing,
+  normalizeMetadataDate,
+  shouldUseAiForMetadata,
+} = require('../../lib/metadata/merge-policy.js');
 
 dotenv.config({ path: path.join(__dirname, '..', '..', '.env.local') });
 dotenv.config({ path: path.join(__dirname, '..', '..', '.env') });
-
-const USER_AGENT = 'PersonalAnimeWeb/1.0 (https://github.com/yourname/personal-web)';
-const MAX_CAST_MEMBERS = 10;
-const DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions';
-const DEEPSEEK_MODEL = 'deepseek-chat';
-const SEASON_PATTERN = /第([一二三四五六七八九十0-9]+)季|Season ([0-9]+)|S([0-9]+)/i;
-const FOLLOW_UP_SEASON_PATTERN = /第[二三四五六七八九十2-9]+季|Season [2-9]|S[2-9]+/i;
 
 const FIELD_CONFIG = {
   originalTitle: { column: 'original_title', type: 'string' },
@@ -21,38 +25,12 @@ const FIELD_CONFIG = {
   summary: { column: 'summary', type: 'string' },
   tags: { column: 'tags', type: 'array' },
   premiereDate: { column: 'premiere_date', type: 'date' },
-  originalWork: { column: 'original_work', type: 'string' },
   cast: { column: 'cast', type: 'array' },
   castAliases: { column: 'cast_aliases', type: 'array' },
   isFinished: { column: 'isFinished', type: 'boolean' },
 };
 
-const DEFAULT_FIELDS = [
-  'originalTitle',
-  'coverUrl',
-  'score',
-  'totalEpisodes',
-  'durationMinutes',
-  'summary',
-  'tags',
-  'premiereDate',
-  'originalWork',
-  'cast',
-  'castAliases',
-  'isFinished',
-];
-
-const AI_CAPABLE_FIELDS = new Set([
-  'originalTitle',
-  'coverUrl',
-  'totalEpisodes',
-  'durationMinutes',
-  'summary',
-  'tags',
-  'premiereDate',
-  'originalWork',
-  'isFinished',
-]);
+const DEFAULT_FIELDS = [...DEFAULT_METADATA_FIELDS];
 
 function uniqueStrings(values) {
   const seen = new Set();
@@ -93,131 +71,7 @@ function parseJsonStringArray(value) {
 }
 
 function normalizeDate(value) {
-  if (!value) {
-    return undefined;
-  }
-
-  if (value instanceof Date) {
-    if (Number.isNaN(value.getTime())) {
-      return undefined;
-    }
-
-    const y = value.getFullYear();
-    const m = String(value.getMonth() + 1).padStart(2, '0');
-    const d = String(value.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
-  }
-
-  const text = String(value).trim();
-  if (!text) {
-    return undefined;
-  }
-
-  if (/^\d{4}-\d{2}-\d{2}$/.test(text)) {
-    return text;
-  }
-
-  const parsed = new Date(text);
-  if (Number.isNaN(parsed.getTime())) {
-    return undefined;
-  }
-
-  const y = parsed.getFullYear();
-  const m = String(parsed.getMonth() + 1).padStart(2, '0');
-  const d = String(parsed.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
-
-function isBlank(value) {
-  return typeof value !== 'string' || !value.trim();
-}
-
-function isMissingFieldValue(field, value) {
-  const config = FIELD_CONFIG[field];
-  if (!config) {
-    return true;
-  }
-
-  switch (config.type) {
-    case 'string':
-      return isBlank(value);
-    case 'number': {
-      const numeric = Number(value);
-      return !Number.isFinite(numeric) || numeric <= 0;
-    }
-    case 'date':
-      return !normalizeDate(value);
-    case 'array':
-      return !Array.isArray(value) || value.length === 0;
-    case 'boolean':
-      return value === null || value === undefined;
-    default:
-      return true;
-  }
-}
-
-function normalizeFieldValue(field, value) {
-  if (value === undefined || value === null) {
-    return undefined;
-  }
-
-  switch (field) {
-    case 'originalTitle':
-    case 'originalWork': {
-      const text = String(value).trim();
-      return text || undefined;
-    }
-    case 'coverUrl': {
-      const text = String(value).trim();
-      if (!text) {
-        return undefined;
-      }
-      return text.replace(/^http:\/\//i, 'https://');
-    }
-    case 'summary': {
-      const text = String(value).trim();
-      if (!text) {
-        return undefined;
-      }
-      if (/无法确定|信息不足|unknown/i.test(text)) {
-        return undefined;
-      }
-      return text;
-    }
-    case 'score': {
-      const score = Number(value);
-      if (!Number.isFinite(score) || score <= 0 || score > 10) {
-        return undefined;
-      }
-      return Number(score.toFixed(1));
-    }
-    case 'totalEpisodes':
-    case 'durationMinutes': {
-      const numeric = Number(value);
-      if (!Number.isFinite(numeric) || numeric <= 0) {
-        return undefined;
-      }
-      return Math.round(numeric);
-    }
-    case 'premiereDate':
-      return normalizeDate(value);
-    case 'tags': {
-      const values = parseJsonStringArray(value);
-      return values.length > 0 ? values.slice(0, 20) : undefined;
-    }
-    case 'cast': {
-      const values = parseJsonStringArray(value);
-      return values.length > 0 ? values.slice(0, MAX_CAST_MEMBERS) : undefined;
-    }
-    case 'castAliases': {
-      const values = parseJsonStringArray(value);
-      return values.length > 0 ? values.slice(0, 30) : undefined;
-    }
-    case 'isFinished':
-      return typeof value === 'boolean' ? value : undefined;
-    default:
-      return undefined;
-  }
+  return normalizeMetadataDate(value);
 }
 
 function sameString(left, right) {
@@ -255,28 +109,6 @@ function sameArray(left, right) {
   return true;
 }
 
-function sameFieldValue(field, left, right) {
-  const config = FIELD_CONFIG[field];
-  if (!config) {
-    return false;
-  }
-
-  switch (config.type) {
-    case 'string':
-      return sameString(left, right);
-    case 'number':
-      return sameNumber(left, right);
-    case 'date':
-      return sameString(normalizeDate(left), normalizeDate(right));
-    case 'array':
-      return sameArray(left, right);
-    case 'boolean':
-      return Boolean(left) === Boolean(right);
-    default:
-      return false;
-  }
-}
-
 function toPrintable(value) {
   if (Array.isArray(value)) {
     return `[${value.slice(0, 6).join(', ')}${value.length > 6 ? ', ...' : ''}]`;
@@ -291,448 +123,6 @@ function toPrintable(value) {
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function fetchJsonWithRetry(url, init = {}, options = {}) {
-  const retries = Number.isFinite(options.retries) ? options.retries : 2;
-  const backoffMs = Number.isFinite(options.backoffMs) ? options.backoffMs : 1200;
-
-  for (let attempt = 0; attempt <= retries; attempt += 1) {
-    let response;
-
-    try {
-      response = await fetch(url, init);
-    } catch (error) {
-      if (attempt < retries) {
-        await sleep(backoffMs * (attempt + 1));
-        continue;
-      }
-      throw error;
-    }
-
-    if (response.ok) {
-      return response.json();
-    }
-
-    if ((response.status === 429 || response.status >= 500) && attempt < retries) {
-      await sleep(backoffMs * (attempt + 1));
-      continue;
-    }
-
-    return null;
-  }
-
-  return null;
-}
-
-function selectBangumiSubject(subjects, title) {
-  let subject = subjects.find((item) => item?.name_cn === title || item?.name === title);
-
-  if (!subject) {
-    const hasSeasonInTitle = SEASON_PATTERN.test(title);
-
-    if (!hasSeasonInTitle) {
-      subject = subjects.find((item) => {
-        const itemName = item?.name_cn || item?.name || '';
-        return !FOLLOW_UP_SEASON_PATTERN.test(itemName);
-      });
-    } else {
-      const seasonQuery = title.match(SEASON_PATTERN)?.[0];
-      if (seasonQuery) {
-        subject = subjects.find((item) => {
-          const itemName = item?.name_cn || item?.name || '';
-          return itemName.includes(seasonQuery);
-        });
-      }
-    }
-  }
-
-  return subject || subjects[0] || null;
-}
-
-async function fetchBangumiSubject(query) {
-  const url = `https://api.bgm.tv/search/subject/${encodeURIComponent(query)}?type=2&responseGroup=small&max_results=5`;
-  const data = await fetchJsonWithRetry(
-    url,
-    {
-      headers: {
-        'User-Agent': USER_AGENT,
-      },
-    },
-    { retries: 2, backoffMs: 1400 }
-  );
-
-  if (!Array.isArray(data?.list) || data.list.length === 0) {
-    return null;
-  }
-
-  return selectBangumiSubject(data.list, query);
-}
-
-async function fetchBangumiCast(subjectId) {
-  const url = `https://api.bgm.tv/subject/${subjectId}?responseGroup=large`;
-  const data = await fetchJsonWithRetry(
-    url,
-    {
-      headers: {
-        'User-Agent': USER_AGENT,
-      },
-    },
-    { retries: 2, backoffMs: 1400 }
-  );
-
-  if (!Array.isArray(data?.crt)) {
-    return [];
-  }
-
-  return uniqueStrings(
-    data.crt.flatMap((character) =>
-      Array.isArray(character?.actors)
-        ? character.actors.map((actor) => actor?.name_cn || actor?.name)
-        : []
-    )
-  ).slice(0, MAX_CAST_MEMBERS);
-}
-
-async function fetchJikanSearch(query) {
-  const url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=1`;
-  const data = await fetchJsonWithRetry(url, {}, { retries: 2, backoffMs: 1400 });
-
-  if (!Array.isArray(data?.data) || data.data.length === 0) {
-    return null;
-  }
-
-  return data.data[0] || null;
-}
-
-async function fetchJikanCast(malId) {
-  const url = `https://api.jikan.moe/v4/anime/${malId}/characters`;
-  const data = await fetchJsonWithRetry(url, {}, { retries: 2, backoffMs: 1400 });
-
-  if (!Array.isArray(data?.data)) {
-    return [];
-  }
-
-  return uniqueStrings(
-    data.data.flatMap((entry) => {
-      const allVoiceActors = Array.isArray(entry?.voice_actors) ? entry.voice_actors : [];
-      const japaneseVoiceActors = allVoiceActors.filter((actor) => actor?.language === 'Japanese');
-      const preferredActors = japaneseVoiceActors.length > 0 ? japaneseVoiceActors : allVoiceActors;
-      return preferredActors.map((actor) => actor?.person?.name);
-    })
-  ).slice(0, MAX_CAST_MEMBERS);
-}
-
-async function fetchProviderMetadata(query) {
-  const title = String(query || '').trim();
-  if (!title) {
-    return null;
-  }
-
-  const result = {};
-  let found = false;
-  let bangumiSubject = null;
-
-  try {
-    bangumiSubject = await fetchBangumiSubject(title);
-
-    if (bangumiSubject) {
-      const bgmCover = bangumiSubject?.images?.large || bangumiSubject?.images?.common || bangumiSubject?.images?.medium;
-      if (bgmCover) {
-        result.coverUrl = String(bgmCover).replace(/^http:\/\//i, 'https://');
-      }
-
-      if (bangumiSubject?.name) {
-        result.originalTitle = bangumiSubject.name;
-      }
-
-      if (bangumiSubject?.id) {
-        const bangumiCast = await fetchBangumiCast(Number(bangumiSubject.id));
-        if (bangumiCast.length > 0) {
-          result.cast = bangumiCast;
-          result.castAliases = bangumiCast;
-        }
-      }
-
-      found = true;
-    }
-  } catch (error) {
-    console.error('[provider] bangumi failed:', error?.message || error);
-  }
-
-  try {
-    const needJikan =
-      !result.coverUrl ||
-      !result.totalEpisodes ||
-      !result.summary ||
-      !result.score ||
-      !result.originalWork ||
-      !result.premiereDate ||
-      !Array.isArray(result.cast) ||
-      result.cast.length === 0;
-
-    if (needJikan) {
-      const anime = await fetchJikanSearch(title);
-      if (anime) {
-        const imageUrl = anime?.images?.jpg?.large_image_url || anime?.images?.jpg?.image_url;
-        if (!result.coverUrl && imageUrl) {
-          result.coverUrl = imageUrl;
-        }
-
-        if (!result.totalEpisodes && anime?.episodes) {
-          result.totalEpisodes = anime.episodes;
-        }
-
-        if (!result.summary && anime?.synopsis) {
-          result.summary = anime.synopsis;
-        }
-
-        if (!result.score && anime?.score) {
-          result.score = anime.score;
-        }
-
-        if (anime?.title_japanese) {
-          result.originalTitle = anime.title_japanese;
-        }
-
-        if (anime?.airing !== undefined) {
-          result.isFinished = !anime.airing;
-        }
-
-        if (anime?.source) {
-          result.originalWork = anime.source;
-        }
-
-        const airedDate = normalizeDate(anime?.aired?.from);
-        if (airedDate) {
-          result.premiereDate = airedDate;
-        }
-
-        if ((!Array.isArray(result.cast) || result.cast.length === 0) && anime?.mal_id) {
-          const jikanCast = await fetchJikanCast(Number(anime.mal_id));
-          if (jikanCast.length > 0) {
-            result.cast = jikanCast;
-            result.castAliases = jikanCast;
-          }
-        }
-
-        found = true;
-      }
-    }
-  } catch (error) {
-    console.error('[provider] jikan failed:', error?.message || error);
-  }
-
-  return found ? result : null;
-}
-
-async function fetchProviderMetadataByQueries(queries) {
-  const deduped = uniqueStrings(queries);
-
-  for (const query of deduped) {
-    const metadata = await fetchProviderMetadata(query);
-    if (metadata) {
-      return { metadata, query };
-    }
-  }
-
-  return { metadata: null, query: deduped[0] || '' };
-}
-
-function getApiKey() {
-  return String(process.env.DEEPSEEK_API_KEY || '').trim();
-}
-
-async function requestDeepSeekJson(messages, apiKey, temperature = 0.2) {
-  if (!apiKey) {
-    return null;
-  }
-
-  const response = await fetch(DEEPSEEK_API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: DEEPSEEK_MODEL,
-      messages,
-      temperature,
-      response_format: { type: 'json_object' },
-    }),
-  });
-
-  if (!response.ok) {
-    return null;
-  }
-
-  const data = await response.json();
-  const content = data?.choices?.[0]?.message?.content;
-  if (typeof content !== 'string' || !content.trim()) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(content);
-  } catch {
-    return null;
-  }
-}
-
-async function fetchAiMetadata(query, apiKey) {
-  const title = String(query || '').trim();
-  if (!title || !apiKey) {
-    return null;
-  }
-
-  const payload = await requestDeepSeekJson(
-    [
-      {
-        role: 'system',
-        content: 'You are an anime metadata assistant. Return JSON only. Leave unknown fields as null. Do not fabricate uncertain facts.',
-      },
-      {
-        role: 'user',
-        content: `
-Query title: ${title}
-
-Return JSON in this exact structure:
-{
-  "originalTitle": "original title in source language or null",
-  "totalEpisodes": 12,
-  "durationMinutes": 24,
-  "synopsis": "short Simplified Chinese summary",
-  "tags": ["TagA", "TagB"],
-  "isFinished": true,
-  "coverUrl": "https://... or null",
-  "originalWork": "manga/light novel/original etc, or null",
-  "premiereDate": "YYYY-MM-DD or null"
-}
-`,
-      },
-    ],
-    apiKey,
-    0.1
-  );
-
-  if (!payload) {
-    return null;
-  }
-
-  return {
-    originalTitle: payload.originalTitle,
-    totalEpisodes: payload.totalEpisodes,
-    durationMinutes: payload.durationMinutes,
-    synopsis: payload.synopsis,
-    tags: payload.tags,
-    isFinished: payload.isFinished,
-    coverUrl: payload.coverUrl,
-    originalWork: payload.originalWork,
-    premiereDate: payload.premiereDate,
-  };
-}
-
-function shouldUseAiForRow(row, providerCandidate, options, apiKey) {
-  if (!options.ai || !apiKey) {
-    return false;
-  }
-
-  for (const field of options.fields) {
-    if (!AI_CAPABLE_FIELDS.has(field)) {
-      continue;
-    }
-
-    const currentValue = row[field];
-    const providerValue = providerCandidate[field];
-
-    if (options.force) {
-      if (providerValue === undefined) {
-        return true;
-      }
-      continue;
-    }
-
-    const missingCurrent = isMissingFieldValue(field, currentValue);
-    const missingProvider = isMissingFieldValue(field, providerValue);
-    if (missingCurrent && missingProvider) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-function buildMergedCandidate(provider, ai) {
-  const providerData = provider || {};
-  const aiData = ai || {};
-
-  const candidate = {
-    originalTitle: providerData.originalTitle ?? aiData.originalTitle,
-    coverUrl: providerData.coverUrl ?? aiData.coverUrl,
-    score: providerData.score,
-    totalEpisodes: providerData.totalEpisodes ?? aiData.totalEpisodes,
-    durationMinutes: providerData.durationMinutes ?? aiData.durationMinutes,
-    summary: providerData.summary ?? aiData.synopsis,
-    tags: providerData.tags ?? aiData.tags,
-    premiereDate: providerData.premiereDate ?? aiData.premiereDate,
-    originalWork: providerData.originalWork ?? aiData.originalWork,
-    cast: providerData.cast ?? aiData.cast,
-    castAliases: providerData.castAliases ?? aiData.castAliases,
-    isFinished: providerData.isFinished ?? aiData.isFinished,
-  };
-
-  const source = {};
-
-  for (const field of Object.keys(candidate)) {
-    if (providerData[field] !== undefined && providerData[field] !== null) {
-      source[field] = 'provider';
-    } else if (aiData[field] !== undefined && aiData[field] !== null) {
-      source[field] = 'ai';
-    }
-  }
-
-  return { candidate, source };
-}
-
-function shouldUpdateField(field, currentValue, nextValue, options) {
-  if (nextValue === undefined) {
-    return false;
-  }
-
-  if (options.force) {
-    return !sameFieldValue(field, currentValue, nextValue);
-  }
-
-  const isMissing = isMissingFieldValue(field, currentValue);
-  if (!isMissing) {
-    if (field === 'isFinished' && currentValue === false && nextValue === true) {
-      return true;
-    }
-    return false;
-  }
-
-  return !sameFieldValue(field, currentValue, nextValue);
-}
-
-function buildPatch(row, merged, options) {
-  const patch = {};
-  const sources = {};
-
-  for (const field of options.fields) {
-    const rawValue = merged.candidate[field];
-    const normalizedNext = normalizeFieldValue(field, rawValue);
-
-    if (normalizedNext === undefined) {
-      continue;
-    }
-
-    if (shouldUpdateField(field, row[field], normalizedNext, options)) {
-      patch[field] = normalizedNext;
-      sources[field] = merged.source[field] || 'unknown';
-    }
-  }
-
-  return { patch, sources };
 }
 
 function toDbValue(field, value) {
@@ -791,7 +181,6 @@ function parseRow(row) {
     summary: typeof row.summary === 'string' ? row.summary : undefined,
     tags: parseJsonStringArray(row.tags),
     premiereDate: normalizeDate(row.premiereDate),
-    originalWork: typeof row.originalWork === 'string' ? row.originalWork : undefined,
     cast: parseJsonStringArray(row.cast),
     castAliases: parseJsonStringArray(row.castAliases),
     isFinished: row.isFinished === null || row.isFinished === undefined ? undefined : Boolean(row.isFinished),
@@ -803,7 +192,7 @@ function rowNeedsProcessing(row, options) {
     return true;
   }
 
-  return options.fields.some((field) => isMissingFieldValue(field, row[field]));
+  return options.fields.some((field) => isMetadataFieldMissing(field, row[field]));
 }
 
 function parseIdsArg(value) {
@@ -825,7 +214,7 @@ function parseFieldsArg(value) {
     return DEFAULT_FIELDS;
   }
 
-  const allowed = Object.keys(FIELD_CONFIG);
+  const allowed = ALL_METADATA_FIELDS;
   const invalid = requested.filter((item) => !allowed.includes(item));
   if (invalid.length > 0) {
     throw new Error(`Unknown fields: ${invalid.join(', ')}. Allowed: ${allowed.join(', ')}`);
@@ -845,6 +234,7 @@ function printHelp() {
   console.log('  --delay=900             Delay between records in ms');
   console.log('  --fields=a,b,c          Restrict to specific fields');
   console.log('  --ids=1,2,3             Process specific anime IDs');
+  console.log('  --ai-only               Skip provider lookup and use AI as the only source');
   console.log('  --no-ai                 Disable AI fallback');
   console.log('  --help                  Show this message');
   console.log('');
@@ -860,6 +250,7 @@ function parseArgs(argv) {
     fields: [...DEFAULT_FIELDS],
     ids: undefined,
     ai: true,
+    aiOnly: false,
   };
 
   for (const arg of argv) {
@@ -880,6 +271,12 @@ function parseArgs(argv) {
 
     if (arg === '--force') {
       options.force = true;
+      continue;
+    }
+
+    if (arg === '--ai-only') {
+      options.aiOnly = true;
+      options.ai = true;
       continue;
     }
 
@@ -917,6 +314,10 @@ function parseArgs(argv) {
     throw new Error(`Unknown option: ${arg}`);
   }
 
+  if (options.aiOnly && !options.ai) {
+    throw new Error('--ai-only cannot be combined with --no-ai');
+  }
+
   return options;
 }
 
@@ -946,7 +347,6 @@ function buildProviderCandidate(providerMetadata) {
     totalEpisodes: provider.totalEpisodes,
     summary: provider.summary || provider.description,
     premiereDate: provider.premiereDate,
-    originalWork: provider.originalWork,
     cast: provider.cast,
     castAliases: provider.castAliases,
     isFinished: provider.isFinished,
@@ -955,7 +355,11 @@ function buildProviderCandidate(providerMetadata) {
 
 async function main() {
   const options = parseArgs(process.argv.slice(2));
-  const apiKey = getApiKey();
+  const apiKey = getDeepSeekApiKey();
+
+  if (options.aiOnly && !apiKey) {
+    throw new Error('DEEPSEEK_API_KEY is required when using --ai-only');
+  }
 
   if (options.ai && !apiKey) {
     console.warn('[warn] DEEPSEEK_API_KEY is empty, AI fallback will be skipped.');
@@ -977,7 +381,6 @@ async function main() {
         summary,
         tags,
         premiere_date AS premiereDate,
-        original_work AS originalWork,
         cast,
         cast_aliases AS castAliases,
         isFinished
@@ -995,7 +398,7 @@ async function main() {
 
     console.log(`Loaded ${allRows.length} anime rows.`);
     console.log(`Will process ${queue.length} rows.`);
-    console.log(`Mode: ${options.dryRun ? 'dry-run' : 'write'} | fields=${options.fields.join(', ')} | force=${options.force}`);
+    console.log(`Mode: ${options.dryRun ? 'dry-run' : 'write'} | fields=${options.fields.join(', ')} | force=${options.force} | aiOnly=${options.aiOnly}`);
 
     let updated = 0;
     let skipped = 0;
@@ -1007,19 +410,31 @@ async function main() {
 
       try {
         const queries = uniqueStrings([row.originalTitle, row.title]);
-        const providerResult = await fetchProviderMetadataByQueries(queries);
-        const providerCandidate = buildProviderCandidate(providerResult.metadata);
+        const providerResult = options.aiOnly
+          ? { metadata: null, query: queries[0] || row.originalTitle || row.title }
+          : await fetchAnimeMetadataByQueriesDetailed(queries);
+        const providerCandidate = options.aiOnly ? {} : buildProviderCandidate(providerResult.metadata);
 
         let aiCandidate = null;
-        const needAi = shouldUseAiForRow(row, providerCandidate, options, apiKey);
+        const needAi = options.ai && apiKey
+          ? (options.aiOnly || shouldUseAiForMetadata(row, providerCandidate, {
+              fields: options.fields,
+              force: options.force,
+            }))
+          : false;
 
         if (needAi && apiKey) {
           aiUsed += 1;
-          aiCandidate = await fetchAiMetadata(providerResult.query || row.originalTitle || row.title, apiKey);
+          aiCandidate = await fetchAiAnimeMetadata(providerResult.query || row.originalTitle || row.title, apiKey);
         }
 
-        const merged = buildMergedCandidate(providerCandidate, aiCandidate);
-        const { patch, sources } = buildPatch(row, merged, options);
+        const merged = buildMetadataCandidate(providerCandidate, aiCandidate);
+        const { patch, sources } = buildMetadataPatch(row, merged, {
+          fields: options.fields,
+          force: options.force,
+          allowCastAliasAugment: true,
+          allowIsFinishedUpgrade: true,
+        });
 
         const changedFields = Object.keys(patch);
         if (changedFields.length === 0) {

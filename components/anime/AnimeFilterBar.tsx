@@ -39,8 +39,9 @@ export default function AnimeFilterBar({
     };
 
     const sortLabels: Record<AnimeSortBy, string> = {
-        updatedAt: '修改时间',
-        createdAt: '创建时间',
+        lastWatchedAt: '最近观看',
+        updatedAt: '最近编辑',
+        createdAt: '最近添加',
         startDate: '开始观看',
         endDate: '看完日期',
         score: '评分',
@@ -49,8 +50,9 @@ export default function AnimeFilterBar({
     };
 
       const sortOptions: Array<{ val: AnimeSortBy; label: string }> = [
-        { val: 'updatedAt', label: '修改时间' },
-        { val: 'createdAt', label: '创建时间' },
+        { val: 'lastWatchedAt', label: '最近观看' },
+        { val: 'updatedAt', label: '最近编辑' },
+        { val: 'createdAt', label: '最近添加' },
         { val: 'startDate', label: '开始观看' },
         { val: 'endDate', label: '看完日期' },
         { val: 'score', label: '评分' },

@@ -5,6 +5,32 @@ import { fetchAnimeMetadataByQueries } from './anime-provider';
 import { uniqueStrings } from './anime-cast';
 import { CreateAnimeDTO } from './anime';
 
+type MetadataSourceInput = Partial<CreateAnimeDTO> & {
+  description?: string;
+  synopsis?: string;
+};
+
+const metadataMergePolicy = require('./metadata/merge-policy.js') as {
+  DEFAULT_METADATA_FIELDS: string[];
+  applyMetadataPatch: (
+    current: CreateAnimeDTO,
+    candidateLike: MetadataSourceInput | { candidate: MetadataSourceInput; source?: Record<string, string> },
+    options?: {
+      fields?: string[];
+      force?: boolean;
+      allowReplaceFilledCover?: boolean;
+      allowCastAliasAugment?: boolean;
+      allowIsFinishedUpgrade?: boolean;
+    }
+  ) => { data: CreateAnimeDTO; patch: Partial<CreateAnimeDTO>; sources: Record<string, string> };
+  buildMetadataCandidate: (
+    provider?: MetadataSourceInput | null,
+    ai?: MetadataSourceInput | null
+  ) => { candidate: Partial<CreateAnimeDTO>; source: Record<string, string> };
+};
+
+const { DEFAULT_METADATA_FIELDS, applyMetadataPatch, buildMetadataCandidate } = metadataMergePolicy;
+
 export type AnimeEnrichmentMode = 'create' | 'fill-missing';
 
 export interface AnimeEnrichmentOptions {
@@ -41,7 +67,7 @@ export async function enrichAnimeInput(input: CreateAnimeDTO, options: AnimeEnri
   const mode = options.mode || 'create';
   const originalUserTitle = (options.originalUserTitle || input.title || '').trim();
 
-  const data: CreateAnimeDTO = {
+  let data: CreateAnimeDTO = {
     ...input,
     tags: input.tags ? [...input.tags] : undefined,
     cast: input.cast ? [...input.cast] : undefined,
@@ -53,45 +79,27 @@ export async function enrichAnimeInput(input: CreateAnimeDTO, options: AnimeEnri
   }
 
   let titleWasStandardized = false;
+  let aiCandidate: MetadataSourceInput | null = null;
+  let providerCandidate: MetadataSourceInput | null = null;
 
   try {
     const enriched = await enrichAnimeData(originalUserTitle);
     if (enriched) {
+      aiCandidate = {
+        originalTitle: enriched.originalTitle,
+        totalEpisodes: enriched.totalEpisodes,
+        durationMinutes: enriched.durationMinutes,
+        summary: enriched.synopsis,
+        tags: enriched.tags,
+        premiereDate: enriched.premiereDate,
+        isFinished: enriched.isFinished,
+        coverUrl: enriched.coverUrl,
+      };
+
       const officialTitle = normalizeTitle(enriched.officialTitle);
       if ((mode === 'create' || mode === 'fill-missing') && officialTitle) {
         titleWasStandardized = officialTitle !== originalUserTitle;
         data.title = officialTitle;
-      }
-
-      if (isBlank(data.originalTitle) && !isBlank(enriched.originalTitle)) {
-        data.originalTitle = enriched.originalTitle;
-      }
-
-      if (shouldFillNumber(data.totalEpisodes) && enriched.totalEpisodes) {
-        data.totalEpisodes = enriched.totalEpisodes;
-      }
-
-      if (shouldFillNumber(data.durationMinutes) && enriched.durationMinutes) {
-        data.durationMinutes = enriched.durationMinutes;
-      }
-
-      if (isBlank(data.summary) && !isBlank(enriched.synopsis)) {
-        data.summary = enriched.synopsis;
-      }
-
-      if (shouldFillArray(data.tags) && Array.isArray(enriched.tags) && enriched.tags.length > 0) {
-        data.tags = enriched.tags;
-      }
-
-      if (data.isFinished === undefined && enriched.isFinished !== undefined) {
-        data.isFinished = enriched.isFinished;
-      }
-
-      if (
-        !isBlank(enriched.coverUrl) &&
-        (isBlank(data.coverUrl) || hasPlaceholderCover(data.coverUrl) || (mode === 'create' && titleWasStandardized))
-      ) {
-        data.coverUrl = enriched.coverUrl;
       }
     }
   } catch (error) {
@@ -101,51 +109,25 @@ export async function enrichAnimeInput(input: CreateAnimeDTO, options: AnimeEnri
   try {
     const metadata = await fetchAnimeMetadataByQueries(data.originalTitle, data.title, originalUserTitle);
     if (metadata) {
+      providerCandidate = metadata;
+
       const providerTitle = normalizeTitle(metadata.title);
-      if ((mode === 'create' || mode === 'fill-missing') && providerTitle && !titleWasStandardized && providerTitle !== data.title) {
-        titleWasStandardized = providerTitle !== originalUserTitle;
+      if ((mode === 'create' || mode === 'fill-missing') && providerTitle && providerTitle !== data.title) {
+        titleWasStandardized = titleWasStandardized || providerTitle !== originalUserTitle;
         data.title = providerTitle;
-      }
-
-      if (!isBlank(metadata.coverUrl) && (isBlank(data.coverUrl) || hasPlaceholderCover(data.coverUrl))) {
-        data.coverUrl = metadata.coverUrl;
-      }
-
-      if (shouldFillNumber(data.totalEpisodes) && metadata.totalEpisodes) {
-        data.totalEpisodes = metadata.totalEpisodes;
-      }
-
-      if (shouldFillNumber(data.score) && metadata.score) {
-        data.score = metadata.score;
-      }
-
-      if (isBlank(data.summary) && !isBlank(metadata.description)) {
-        data.summary = metadata.description;
-      }
-
-      if (isBlank(data.originalTitle) && !isBlank(metadata.originalTitle)) {
-        data.originalTitle = metadata.originalTitle;
-      }
-
-      if (isBlank(data.originalWork) && !isBlank(metadata.originalWork)) {
-        data.originalWork = metadata.originalWork;
-      }
-
-      if (shouldFillArray(data.cast) && Array.isArray(metadata.cast) && metadata.cast.length > 0) {
-        data.cast = metadata.cast;
-      }
-
-      if (Array.isArray(metadata.castAliases) && metadata.castAliases.length > 0) {
-        data.castAliases = uniqueStrings([...(data.castAliases || []), ...metadata.castAliases]);
-      }
-
-      if (data.isFinished === undefined && metadata.isFinished !== undefined) {
-        data.isFinished = metadata.isFinished;
       }
     }
   } catch (error) {
     console.error('Provider metadata enrichment failed:', error);
   }
+
+  const mergedCandidate = buildMetadataCandidate(providerCandidate, aiCandidate);
+  data = applyMetadataPatch(data, mergedCandidate, {
+    fields: DEFAULT_METADATA_FIELDS,
+    allowReplaceFilledCover: mode === 'create' && titleWasStandardized,
+    allowCastAliasAugment: true,
+    allowIsFinishedUpgrade: true,
+  }).data;
 
   if (Array.isArray(data.cast) && data.cast.length > 0) {
     try {

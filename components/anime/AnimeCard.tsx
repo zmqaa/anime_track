@@ -3,13 +3,7 @@
 import Link from 'next/link';
 import { CheckIcon, PlusIcon, EllipsisHorizontalIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import type { AnimeCardItem, AnimeStatus } from '@/lib/anime-shared';
-
-const statusMap: Record<AnimeStatus, string> = {
-  watching: '追番中',
-  completed: '已看完',
-  dropped: '已弃坑',
-  plan_to_watch: '计划看',
-};
+import { statusLabels } from '@/lib/dashboard-types';
 
 const statusColors: Record<AnimeStatus, string> = {
   watching: 'from-blue-500/10 to-blue-500/5 text-blue-400 border-blue-500/20',
@@ -59,7 +53,7 @@ export default function AnimeCard({ item, onEdit, updateProgress, isAdmin = fals
           {/* 顶部标签 */}
           <div className="absolute top-2 left-2 flex flex-wrap gap-1">
             <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium border bg-gradient-to-r backdrop-blur-md ${statusColors[item.status]}`}>
-              {statusMap[item.status]}
+              {statusLabels[item.status]}
             </span>
             {item.isFinished === false && item.status === 'watching' && (
               <span className="px-2 py-0.5 rounded-full text-[10px] font-medium border border-blue-500/20 bg-blue-500/10 text-blue-400 backdrop-blur-md animate-pulse">

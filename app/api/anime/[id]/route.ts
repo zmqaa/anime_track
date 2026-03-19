@@ -71,7 +71,7 @@ export async function PATCH(
     cast: normalizeStringArray(body.cast) ?? body.cast,
     castAliases: normalizeStringArray(body.castAliases) ?? body.castAliases,
   };
-  const allowedKeys = ['title', 'originalTitle', 'status', 'progress', 'score', 'totalEpisodes', 'notes', 'coverUrl', 'durationMinutes', 'tags', 'summary', 'startDate', 'endDate', 'premiereDate', 'originalWork', 'cast', 'castAliases', 'isFinished'] as const;
+  const allowedKeys = ['title', 'originalTitle', 'status', 'progress', 'score', 'totalEpisodes', 'notes', 'coverUrl', 'durationMinutes', 'tags', 'summary', 'startDate', 'endDate', 'premiereDate', 'cast', 'castAliases', 'isFinished'] as const;
   type AllowedKey = (typeof allowedKeys)[number];
   const updateData: Partial<AnimeRecord> = {};
 

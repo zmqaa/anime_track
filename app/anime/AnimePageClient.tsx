@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { MagnifyingGlassIcon, TvIcon, TagIcon, SparklesIcon, FireIcon } from '@heroicons/react/24/outline';
 import AnimeHeader from '@/components/anime/AnimeHeader';
@@ -11,10 +11,40 @@ import AnimeGrid from '@/components/anime/AnimeGrid';
 import { containsCjkText, matchesTextQuery, uniqueStrings } from '@/lib/anime-cast';
 import type { AnimeStatus, AnimeSortBy, SessionUser, AnimeListItem, AnimeCardItem } from '@/lib/anime-shared';
 
+function compareNumberValues(left: number, right: number, order: 'asc' | 'desc') {
+  return order === 'asc' ? left - right : right - left;
+}
+
+function compareTextValues(left: string, right: string, order: 'asc' | 'desc') {
+  const result = left.localeCompare(right, 'zh-CN');
+  return order === 'asc' ? result : -result;
+}
+
+function compareDateValues(left: string | undefined, right: string | undefined, order: 'asc' | 'desc') {
+  const leftTime = left ? new Date(left).getTime() : Number.NaN;
+  const rightTime = right ? new Date(right).getTime() : Number.NaN;
+  const leftMissing = Number.isNaN(leftTime);
+  const rightMissing = Number.isNaN(rightTime);
+
+  if (leftMissing && rightMissing) return 0;
+  if (leftMissing) return 1;
+  if (rightMissing) return -1;
+
+  return order === 'asc' ? leftTime - rightTime : rightTime - leftTime;
+}
+
+function formatRecentWatchDate(value: string | undefined) {
+  if (!value) return '时间未知';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' });
+}
+
 export default function AnimePageClient() {
   const { data: session } = useSession();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const pathname = usePathname();
   const isAdmin = (session?.user as SessionUser | undefined)?.role === 'admin';
   const [items, setItems] = useState<AnimeListItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,9 +59,10 @@ export default function AnimePageClient() {
   const [searchQuery, setSearchQuery] = useState('');
   const [castQuery, setCastQuery] = useState('');
   const [tagFilter, setTagFilter] = useState('');
-  const [sortBy, setSortBy] = useState<AnimeSortBy>('updatedAt');
+  const [sortBy, setSortBy] = useState<AnimeSortBy>('lastWatchedAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const hasSyncedUrlFilters = useRef(false);
+  const lastFilterKeyRef = useRef('');
   
   // 从 URL 读取页码，默认 1，缺失时回退 sessionStorage
   const currentPage = useMemo(() => {
@@ -40,11 +71,18 @@ export default function AnimePageClient() {
   }, [searchParams]);
 
   const setCurrentPage = useCallback((page: number) => {
+    const nextPage = Math.max(1, page);
     const params = new URLSearchParams(searchParams.toString());
-    params.set('page', String(page));
-    router.push(`?${params.toString()}`, { scroll: false });
-    sessionStorage.setItem('anime_last_page', String(page));
-  }, [router, searchParams]);
+    if (nextPage === 1) {
+      params.delete('page');
+    } else {
+      params.set('page', String(nextPage));
+    }
+
+    const query = params.toString();
+    router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    sessionStorage.setItem('anime_last_page', String(nextPage));
+  }, [pathname, router, searchParams]);
 
   // 缺少页码时，用上次停留的页码填充 URL
   useEffect(() => {
@@ -115,12 +153,26 @@ export default function AnimePageClient() {
     hasSyncedUrlFilters.current = true;
   }, [searchParams]);
 
+  const filterStateKey = useMemo(
+    () => [filterStatus, searchQuery, castQuery, tagFilter, sortBy, sortOrder].join('||'),
+    [filterStatus, searchQuery, castQuery, tagFilter, sortBy, sortOrder]
+  );
+
   useEffect(() => {
-    // 只有当过滤器改变时才重置到第一页
-    if (currentPage !== 1 && (filterStatus !== 'all' || searchQuery !== '' || castQuery !== '' || tagFilter !== '')) {
-        setCurrentPage(1);
+    if (!lastFilterKeyRef.current) {
+      lastFilterKeyRef.current = filterStateKey;
+      return;
     }
-  }, [currentPage, filterStatus, searchQuery, castQuery, tagFilter, sortBy, sortOrder, setCurrentPage]);
+
+    if (lastFilterKeyRef.current === filterStateKey) {
+      return;
+    }
+
+    lastFilterKeyRef.current = filterStateKey;
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    }
+  }, [currentPage, filterStateKey, setCurrentPage]);
 
   const resetForm = () => {
     setShowForm(false);
@@ -220,11 +272,37 @@ export default function AnimePageClient() {
       await loadItems();
       setQuickInput('');
 
-      const title = data?.entry?.title || '番剧';
+      const results = Array.isArray(data?.results)
+        ? (data.results as Array<{
+            entry?: { title?: string };
+            recognition?: { matchedTitle?: string; standardTitle?: string };
+          }>)
+        : [];
+      if (results.length > 1) {
+        const titlePreview = results
+          .slice(0, 3)
+          .map((item) => item?.entry?.title || item?.recognition?.matchedTitle || item?.recognition?.standardTitle || '番剧')
+          .join('、');
+        const tail = results.length > 3 ? ` 等${results.length}部` : '';
+        const countsText = `新建${Number(data?.createdCount) || 0}，更新${Number(data?.updatedCount) || 0}，补记${Number(data?.replayCount) || 0}`;
+        const historyText = Number(data?.historySkippedCount) > 0 ? `；${data.historySkippedCount}条历史记录未写入今日时间` : '';
+        const errorText = Array.isArray(data?.errors) && data.errors.length > 0 ? `；${data.errors.length}条处理失败` : '';
+        setQuickMessage(`已处理 ${results.length} 条：${titlePreview}${tail}；${countsText}${historyText}${errorText}`);
+        return;
+      }
+
+      const title = data?.entry?.title || data?.recognition?.matchedTitle || '番剧';
       const progress = data?.entry?.progress;
+      const standardTitle = typeof data?.recognition?.standardTitle === 'string' ? data.recognition.standardTitle : data?.parsed?.animeTitle;
+      const originalTitle = typeof data?.recognition?.originalTitle === 'string' ? data.recognition.originalTitle : data?.parsed?.originalTitle;
+      const enriched = Boolean(data?.recognition?.enriched);
+      const historyWritten = data?.recognition?.historyWritten !== false;
       const rewatchTag = typeof data?.rewatchTag === 'string' ? data.rewatchTag : '';
-      const stateText = data?.created ? (rewatchTag ? `${rewatchTag}已新建并记录` : '已新建并记录') : '已记录';
-      setQuickMessage(`${stateText}：${title}${Number.isFinite(progress) ? `（EP ${progress}）` : ''}`);
+      const stateText = data?.created ? (rewatchTag ? `${rewatchTag}已新建并记录` : '已新建并记录') : (data?.replay ? '已补记' : '已记录');
+      const recognizedText = standardTitle ? `；识别：${standardTitle}${originalTitle ? ` / ${originalTitle}` : ''}` : '';
+      const enrichedText = enriched ? '（已AI补全）' : '';
+      const historyText = historyWritten ? '' : '；历史补录未写入今日观看时间';
+      setQuickMessage(`${stateText}：${title}${Number.isFinite(progress) ? `（EP ${progress}）` : ''}${recognizedText}${enrichedText}${historyText}`);
     } catch (error) {
       console.error('Quick record failed:', error);
       setQuickMessage('AI录入失败，请稍后重试');
@@ -269,6 +347,13 @@ export default function AnimePageClient() {
     }
   }, [currentPage, setCurrentPage]);
 
+  const recentWatchItems = useMemo(() => {
+    return [...items]
+      .filter((item) => Boolean(item.lastWatchedAt))
+      .sort((a, b) => compareDateValues(a.lastWatchedAt, b.lastWatchedAt, 'desc'))
+      .slice(0, 5);
+  }, [items]);
+
   // 综合过滤与排序
   const filteredItems = useMemo(() => {
     const result = items.filter(item => {
@@ -280,28 +365,46 @@ export default function AnimePageClient() {
     });
 
     return result.sort((a, b) => {
-      let valA = a[sortBy];
-      let valB = b[sortBy];
-      
-      // 处理数值类排序
-      if (sortBy === 'score' || sortBy === 'progress') {
-        valA = Number(valA) || 0;
-        valB = Number(valB) || 0;
+      if (sortBy === 'score') {
+        return compareNumberValues(a.score ?? 0, b.score ?? 0, sortOrder);
       }
 
-      // 处理日期类排序，空日期排在最后
-      if (sortBy === 'startDate' || sortBy === 'endDate' || sortBy === 'updatedAt' || sortBy === 'createdAt') {
-          if (!valA && !valB) return 0;
-          if (!valA) return 1;
-          if (!valB) return -1;
+      if (sortBy === 'progress') {
+        return compareNumberValues(a.progress, b.progress, sortOrder);
       }
-      
-      const comparableA = valA ?? '';
-      const comparableB = valB ?? '';
 
-      if (comparableA < comparableB) return sortOrder === 'asc' ? -1 : 1;
-      if (comparableA > comparableB) return sortOrder === 'asc' ? 1 : -1;
-      return 0;
+      if (sortBy === 'title') {
+        return compareTextValues(a.title, b.title, sortOrder);
+      }
+
+      if (sortBy === 'lastWatchedAt') {
+        const leftHasWatch = Boolean(a.lastWatchedAt);
+        const rightHasWatch = Boolean(b.lastWatchedAt);
+
+        if (leftHasWatch && rightHasWatch) {
+          return compareDateValues(a.lastWatchedAt, b.lastWatchedAt, sortOrder);
+        }
+
+        if (leftHasWatch !== rightHasWatch) {
+          return leftHasWatch ? -1 : 1;
+        }
+
+        return compareDateValues(a.createdAt, b.createdAt, sortOrder);
+      }
+
+      if (sortBy === 'updatedAt') {
+        return compareDateValues(a.updatedAt, b.updatedAt, sortOrder);
+      }
+
+      if (sortBy === 'createdAt') {
+        return compareDateValues(a.createdAt, b.createdAt, sortOrder);
+      }
+
+      if (sortBy === 'startDate') {
+        return compareDateValues(a.startDate, b.startDate, sortOrder);
+      }
+
+      return compareDateValues(a.endDate, b.endDate, sortOrder);
     });
   }, [items, filterStatus, searchQuery, castQuery, tagFilter, sortBy, sortOrder]);
 
@@ -357,7 +460,7 @@ export default function AnimePageClient() {
             </button>
           </form>
 
-          <p className="text-xs text-zinc-500 mt-2">自动识别番名、集数并更新进度，同时写入观看历史。句子里写“二刷 / 3刷 / 重刷”会新建同名条目并自动打标签。</p>
+          <p className="text-xs text-zinc-500 mt-2">支持自然语言拆成多条记录；AI 先返回结构化字段，缺失资料再补全。句子里写“以前 / 之前”时，不会再默认写成今天开始看。</p>
           {quickMessage && (
             <p className={`text-xs mt-2 ${quickMessage.includes('失败') || quickMessage.includes('请输入') ? 'text-red-400' : 'text-emerald-400'}`}>
               {quickMessage}
@@ -538,20 +641,17 @@ export default function AnimePageClient() {
              </div>
           </div>
 
-          {/* 最近更新 */}
+           {/* 最近观看 */}
           <div className="bg-zinc-900/50 backdrop-blur-xl border border-white/5 rounded-2xl p-6 shadow-xl relative overflow-hidden group">
              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                 <FireIcon className="w-16 h-16 text-white" />
              </div>
              <h3 className="text-sm font-bold text-zinc-400 mb-6 uppercase tracking-widest flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
-                最近动态
+               最近观看
              </h3>
              <div className="space-y-3 relative z-10">
-                {items
-                  .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-                  .slice(0, 5)
-                  .map(item => (
+               {recentWatchItems.length > 0 ? recentWatchItems.map(item => (
                     <div 
                         key={item.id} 
                         onClick={() => isAdmin && startEdit(item)}
@@ -568,9 +668,9 @@ export default function AnimePageClient() {
                         <div className="flex-1 min-w-0">
                             <div className="text-xs font-bold text-zinc-200 truncate group-hover/item:text-blue-400 transition-colors uppercase tracking-tight">{item.title}</div>
                             <div className="text-[10px] text-zinc-500 mt-0.5 flex items-center gap-2">
-                                <span className="font-medium">{item.status === 'completed' ? '已看完' : `看到第 ${item.progress} 集`}</span>
+                            <span className="font-medium">看到第 {item.progress} 集</span>
                                 <span className="w-1 h-1 rounded-full bg-zinc-800"></span>
-                                <span className="italic font-mono">{new Date(item.updatedAt).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })}</span>
+                            <span className="italic font-mono">{formatRecentWatchDate(item.lastWatchedAt)}</span>
                             </div>
                         </div>
                         {isAdmin && (
@@ -581,7 +681,9 @@ export default function AnimePageClient() {
                             </div>
                         )}
                     </div>
-                  ))}
+                  )) : (
+                    <div className="text-sm text-zinc-500">暂无观看记录，先用“看一集”或 AI 录入补几条历史。</div>
+                  )}
              </div>
           </div>
         </div>

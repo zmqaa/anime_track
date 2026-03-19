@@ -1,0 +1,4033 @@
+{
+  "startedAt": "2026-03-18T09:56:00.087Z",
+  "finishedAt": "2026-03-18T10:03:41.266Z",
+  "mode": "write",
+  "options": {
+    "force": false,
+    "limit": null,
+    "delay": 900,
+    "ids": null,
+    "ai": true,
+    "minConfidence": 0.75,
+    "logFile": "logs\\maintenance\\premiere-date\\full-rerun-latest.json"
+  },
+  "summary": {
+    "loadedCount": 143,
+    "selectedCount": 143,
+    "changedCount": 141,
+    "skippedCount": 2,
+    "errorCount": 0,
+    "providerSelectedCount": 132,
+    "aiSelectedCount": 9,
+    "aiCallCount": 11
+  },
+  "entries": [
+    {
+      "id": 5,
+      "title": "A频道",
+      "originalTitle": "Aチャンネル",
+      "beforePremiereDate": null,
+      "queries": [
+        "Aチャンネル",
+        "A频道"
+      ],
+      "provider": {
+        "query": "Aチャンネル",
+        "premiereDate": "2011-04-07",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "Aチャンネル"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2011-04-07",
+      "reason": "updated"
+    },
+    {
+      "id": 6,
+      "title": "悠悠式",
+      "originalTitle": "ゆゆ式",
+      "beforePremiereDate": null,
+      "queries": [
+        "ゆゆ式",
+        "悠悠式"
+      ],
+      "provider": {
+        "query": "ゆゆ式",
+        "premiereDate": "2013-04-09",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "ゆゆ式"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2013-04-09",
+      "reason": "updated"
+    },
+    {
+      "id": 9,
+      "title": "Slow Start",
+      "originalTitle": "スロウスタート",
+      "beforePremiereDate": null,
+      "queries": [
+        "スロウスタート",
+        "Slow Start"
+      ],
+      "provider": {
+        "query": "スロウスタート",
+        "premiereDate": "2018-01-06",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "スロウスタート"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2018-01-06",
+      "reason": "updated"
+    },
+    {
+      "id": 10,
+      "title": "擅长捉弄的高木同学",
+      "originalTitle": "からかい上手の高木さん",
+      "beforePremiereDate": null,
+      "queries": [
+        "からかい上手の高木さん",
+        "擅长捉弄的高木同学"
+      ],
+      "provider": {
+        "query": "からかい上手の高木さん",
+        "premiereDate": "2018-01-08",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "からかい上手の高木さん"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2018-01-08",
+      "reason": "updated"
+    },
+    {
+      "id": 11,
+      "title": "黑社会的超能力女儿",
+      "originalTitle": "ヒナまつり",
+      "beforePremiereDate": null,
+      "queries": [
+        "ヒナまつり",
+        "黑社会的超能力女儿"
+      ],
+      "provider": {
+        "query": "ヒナまつり",
+        "premiereDate": "2018-04-06",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "ヒナまつり"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2018-04-06",
+      "reason": "updated"
+    },
+    {
+      "id": 18,
+      "title": "愚蠢天使与恶魔共舞",
+      "originalTitle": "愚かな天使は悪魔と踊る",
+      "beforePremiereDate": null,
+      "queries": [
+        "愚かな天使は悪魔と踊る",
+        "愚蠢天使与恶魔共舞"
+      ],
+      "provider": {
+        "query": "愚かな天使は悪魔と踊る",
+        "premiereDate": "2024-01-08",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "愚かな天使は悪魔と踊る"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2024-01-08",
+      "reason": "updated"
+    },
+    {
+      "id": 20,
+      "title": "一杆青空",
+      "originalTitle": "一杆青空",
+      "beforePremiereDate": null,
+      "queries": [
+        "一杆青空"
+      ],
+      "provider": {
+        "query": "一杆青空",
+        "premiereDate": "2025-01-03",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "一杆青空"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2025-01-03",
+      "reason": "updated"
+    },
+    {
+      "id": 23,
+      "title": "打了300年的史莱姆，不知不觉就练到了满级 第二季",
+      "originalTitle": "スライム倒して300年、知らないうちにレベルMAXになってました 第2期",
+      "beforePremiereDate": null,
+      "queries": [
+        "スライム倒して300年、知らないうちにレベルMAXになってました 第2期",
+        "打了300年的史莱姆，不知不觉就练到了满级 第二季"
+      ],
+      "provider": {
+        "query": "スライム倒して300年、知らないうちにレベルMAXになってました 第2期",
+        "premiereDate": "2025-04-05",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "スライム倒して300年、知らないうちにレベルMAXになってました 第2期"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2025-04-05",
+      "reason": "updated"
+    },
+    {
+      "id": 26,
+      "title": "测不准的阿波连同学 第二季",
+      "originalTitle": "阿波連さんははかれない 第2期",
+      "beforePremiereDate": null,
+      "queries": [
+        "阿波連さんははかれない 第2期",
+        "测不准的阿波连同学 第二季"
+      ],
+      "provider": {
+        "query": "阿波連さんははかれない 第2期",
+        "premiereDate": "2019-08-30",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "阿波連さんははかれない 第2期"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2019-08-30",
+      "reason": "updated"
+    },
+    {
+      "id": 28,
+      "title": "时光流逝，饭菜依旧美味",
+      "originalTitle": "時が経ってもご飯は美味しい",
+      "beforePremiereDate": null,
+      "queries": [
+        "時が経ってもご飯は美味しい",
+        "时光流逝，饭菜依旧美味"
+      ],
+      "provider": {
+        "query": "時が経ってもご飯は美味しい",
+        "premiereDate": "2024-01-07",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "時が経ってもご飯は美味しい"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2024-01-07",
+      "reason": "updated"
+    },
+    {
+      "id": 29,
+      "title": "mono女孩",
+      "originalTitle": "mono",
+      "beforePremiereDate": null,
+      "queries": [
+        "mono",
+        "mono女孩"
+      ],
+      "provider": {
+        "query": "mono",
+        "premiereDate": "2025-04-12",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "mono"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2025-04-12",
+      "reason": "updated"
+    },
+    {
+      "id": 30,
+      "title": "薰香花朵凛然绽放",
+      "originalTitle": "薫香花は凛と咲く",
+      "beforePremiereDate": null,
+      "queries": [
+        "薫香花は凛と咲く",
+        "薰香花朵凛然绽放"
+      ],
+      "provider": {
+        "query": "薫香花は凛と咲く",
+        "premiereDate": "2025-07-05",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "薫香花は凛と咲く"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2025-07-05",
+      "reason": "updated"
+    },
+    {
+      "id": 31,
+      "title": "不良少女",
+      "originalTitle": "bad girl",
+      "beforePremiereDate": null,
+      "queries": [
+        "bad girl",
+        "不良少女"
+      ],
+      "provider": {
+        "query": "bad girl",
+        "premiereDate": "2025-07-05",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "bad girl"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2025-07-05",
+      "reason": "updated"
+    },
+    {
+      "id": 32,
+      "title": "明天，美食广场见。",
+      "originalTitle": "明日、フードコートで。",
+      "beforePremiereDate": null,
+      "queries": [
+        "明日、フードコートで。",
+        "明天，美食广场见。"
+      ],
+      "provider": {
+        "query": "明天，美食广场见。",
+        "premiereDate": "2025-07-07",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "明天，美食广场见。"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2025-07-07",
+      "reason": "updated"
+    },
+    {
+      "id": 33,
+      "title": "我们不可能成为恋人！绝对不行。（※似乎可行？）",
+      "originalTitle": "私たちは恋愛ができない！絶対にダメです。（※できそう？）",
+      "beforePremiereDate": null,
+      "queries": [
+        "私たちは恋愛ができない！絶対にダメです。（※できそう？）",
+        "我们不可能成为恋人！绝对不行。（※似乎可行？）"
+      ],
+      "provider": {
+        "query": "我们不可能成为恋人！绝对不行。（※似乎可行？）",
+        "premiereDate": "2025-07-07",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "我们不可能成为恋人！绝对不行。（※似乎可行？）"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2025-07-07",
+      "reason": "updated"
+    },
+    {
+      "id": 34,
+      "title": "碧蓝之海 第二季",
+      "originalTitle": "ぐらんぶる 第2期",
+      "beforePremiereDate": null,
+      "queries": [
+        "ぐらんぶる 第2期",
+        "碧蓝之海 第二季"
+      ],
+      "provider": {
+        "query": "ぐらんぶる 第2期",
+        "premiereDate": "1996-08-05",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "ぐらんぶる 第2期"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "1996-08-05",
+      "reason": "updated"
+    },
+    {
+      "id": 36,
+      "title": "矢野同学的普通日常",
+      "originalTitle": "矢野くんの普通の日常",
+      "beforePremiereDate": null,
+      "queries": [
+        "矢野くんの普通の日常",
+        "矢野同学的普通日常"
+      ],
+      "provider": {
+        "query": "矢野くんの普通の日常",
+        "premiereDate": "2025-09-30",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "矢野くんの普通の日常"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2025-09-30",
+      "reason": "updated"
+    },
+    {
+      "id": 37,
+      "title": "和山田进行LV999的恋爱",
+      "originalTitle": "山田くんとLv999の恋をする",
+      "beforePremiereDate": null,
+      "queries": [
+        "山田くんとLv999の恋をする",
+        "和山田进行LV999的恋爱"
+      ],
+      "provider": {
+        "query": "山田くんとLv999の恋をする",
+        "premiereDate": "2023-04-01",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "山田くんとLv999の恋をする"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2023-04-01",
+      "reason": "updated"
+    },
+    {
+      "id": 44,
+      "title": "请问您今天要来点兔子吗？",
+      "originalTitle": "ご注文はうさぎですか？",
+      "beforePremiereDate": null,
+      "queries": [
+        "ご注文はうさぎですか？",
+        "请问您今天要来点兔子吗？"
+      ],
+      "provider": {
+        "query": "ご注文はうさぎですか？",
+        "premiereDate": "2014-04-10",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "ご注文はうさぎですか？"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2014-04-10",
+      "reason": "updated"
+    },
+    {
+      "id": 46,
+      "title": "擅长捉弄的高木同学 第三季",
+      "originalTitle": "からかい上手の高木さん 3",
+      "beforePremiereDate": null,
+      "queries": [
+        "からかい上手の高木さん 3",
+        "擅长捉弄的高木同学 第三季"
+      ],
+      "provider": {
+        "query": "からかい上手の高木さん 3",
+        "premiereDate": "2018-01-08",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "からかい上手の高木さん 3"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2018-01-08",
+      "reason": "updated"
+    },
+    {
+      "id": 47,
+      "title": "擅长捉弄的高木同学 剧场版",
+      "originalTitle": "からかい上手の高木さん 劇場版",
+      "beforePremiereDate": null,
+      "queries": [
+        "からかい上手の高木さん 劇場版",
+        "擅长捉弄的高木同学 剧场版"
+      ],
+      "provider": {
+        "query": "からかい上手の高木さん 劇場版",
+        "premiereDate": "2022-06-10",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "からかい上手の高木さん 劇場版"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2022-06-10",
+      "reason": "updated"
+    },
+    {
+      "id": 48,
+      "title": "不要欺负我，长瀞同学",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "不要欺负我，长瀞同学"
+      ],
+      "provider": {
+        "query": "不要欺负我，长瀞同学",
+        "premiereDate": "2021-04-10",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "不要欺负我，长瀞同学"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2021-04-10",
+      "reason": "updated"
+    },
+    {
+      "id": 49,
+      "title": "天使降临到我身边！",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "天使降临到我身边！"
+      ],
+      "provider": {
+        "query": "天使降临到我身边！",
+        "premiereDate": "2019-01-08",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "天使降临到我身边！"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2019-01-08",
+      "reason": "updated"
+    },
+    {
+      "id": 50,
+      "title": "相反的你和我",
+      "originalTitle": "相反的你和我",
+      "beforePremiereDate": null,
+      "queries": [
+        "相反的你和我"
+      ],
+      "provider": {
+        "query": "相反的你和我",
+        "premiereDate": "2026-01-11",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "相反的你和我"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2026-01-11",
+      "reason": "updated"
+    },
+    {
+      "id": 53,
+      "title": "玉子市场",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "玉子市场"
+      ],
+      "provider": {
+        "query": "玉子市场",
+        "premiereDate": "2013-01-09",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "玉子市场"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2013-01-09",
+      "reason": "updated"
+    },
+    {
+      "id": 54,
+      "title": "轻音少女",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "轻音少女"
+      ],
+      "provider": {
+        "query": "轻音少女",
+        "premiereDate": "2009-04-02",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "轻音少女"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2009-04-02",
+      "reason": "updated"
+    },
+    {
+      "id": 55,
+      "title": "轻音少女 第二季",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "轻音少女 第二季"
+      ],
+      "provider": {
+        "query": "轻音少女 第二季",
+        "premiereDate": "2010-04-06",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "轻音少女 第二季"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2010-04-06",
+      "reason": "updated"
+    },
+    {
+      "id": 56,
+      "title": "擅长捉弄的高木同学 第二季",
+      "originalTitle": "擅长捉弄的高木同学 第二季",
+      "beforePremiereDate": null,
+      "queries": [
+        "擅长捉弄的高木同学 第二季"
+      ],
+      "provider": {
+        "query": "擅长捉弄的高木同学 第二季",
+        "premiereDate": "2019-07-07",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "擅长捉弄的高木同学 第二季"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2019-07-07",
+      "reason": "updated"
+    },
+    {
+      "id": 57,
+      "title": "请问您今天要来点兔子吗？ 第二季",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "请问您今天要来点兔子吗？ 第二季"
+      ],
+      "provider": {
+        "query": "请问您今天要来点兔子吗？ 第二季",
+        "premiereDate": "2015-10-10",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "请问您今天要来点兔子吗？ 第二季"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2015-10-10",
+      "reason": "updated"
+    },
+    {
+      "id": 58,
+      "title": "SLOW LOOP",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "SLOW LOOP"
+      ],
+      "provider": {
+        "query": "SLOW LOOP",
+        "premiereDate": "2022-01-07",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "SLOW LOOP"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2022-01-07",
+      "reason": "updated"
+    },
+    {
+      "id": 59,
+      "title": "星灵感应",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "星灵感应"
+      ],
+      "provider": {
+        "query": "星灵感应",
+        "premiereDate": "2023-10-09",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "星灵感应"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2023-10-09",
+      "reason": "updated"
+    },
+    {
+      "id": 60,
+      "title": "这个美术社大有问题！",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "这个美术社大有问题！"
+      ],
+      "provider": {
+        "query": "这个美术社大有问题！",
+        "premiereDate": "2016-07-07",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "这个美术社大有问题！"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2016-07-07",
+      "reason": "updated"
+    },
+    {
+      "id": 61,
+      "title": "月刊少女野崎君",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "月刊少女野崎君"
+      ],
+      "provider": {
+        "query": "月刊少女野崎君",
+        "premiereDate": "2014-07-06",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "月刊少女野崎君"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2014-07-06",
+      "reason": "updated"
+    },
+    {
+      "id": 62,
+      "title": "邻家索菲",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "邻家索菲"
+      ],
+      "provider": {
+        "query": "邻家索菲",
+        "premiereDate": "2018-10-05",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "邻家索菲"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2018-10-05",
+      "reason": "updated"
+    },
+    {
+      "id": 63,
+      "title": "恋爱小行星",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "恋爱小行星"
+      ],
+      "provider": {
+        "query": "恋爱小行星",
+        "premiereDate": "2020-01-03",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "恋爱小行星"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2020-01-03",
+      "reason": "updated"
+    },
+    {
+      "id": 64,
+      "title": "三者三叶",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "三者三叶"
+      ],
+      "provider": {
+        "query": "三者三叶",
+        "premiereDate": "2016-04-10",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "三者三叶"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2016-04-10",
+      "reason": "updated"
+    },
+    {
+      "id": 65,
+      "title": "飞翔的魔女",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "飞翔的魔女"
+      ],
+      "provider": {
+        "query": "飞翔的魔女",
+        "premiereDate": "2016-04-09",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "飞翔的魔女"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2016-04-09",
+      "reason": "updated"
+    },
+    {
+      "id": 66,
+      "title": "悠哉日常大王",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "悠哉日常大王"
+      ],
+      "provider": {
+        "query": "悠哉日常大王",
+        "premiereDate": "2013-10-07",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "悠哉日常大王"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2013-10-07",
+      "reason": "updated"
+    },
+    {
+      "id": 67,
+      "title": "悠哉日常大王 Repeat",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "悠哉日常大王 Repeat"
+      ],
+      "provider": {
+        "query": "悠哉日常大王 Repeat",
+        "premiereDate": "2015-07-06",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "悠哉日常大王 Repeat"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2015-07-06",
+      "reason": "updated"
+    },
+    {
+      "id": 69,
+      "title": "迷糊餐厅 第一季",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "迷糊餐厅 第一季"
+      ],
+      "provider": {
+        "query": "迷糊餐厅 第一季",
+        "premiereDate": null,
+        "premiereDateSource": null,
+        "decision": "missing_date"
+      },
+      "ai": {
+        "used": true,
+        "premiereDate": "2010-04-04",
+        "confidence": 0.9,
+        "decision": "accepted"
+      },
+      "outcome": "updated",
+      "source": "ai",
+      "afterPremiereDate": "2010-04-04",
+      "reason": "updated"
+    },
+    {
+      "id": 70,
+      "title": "迷糊餐厅 第二季",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "迷糊餐厅 第二季"
+      ],
+      "provider": {
+        "query": "迷糊餐厅 第二季",
+        "premiereDate": "2011-10-01",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "迷糊餐厅 第二季"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2011-10-01",
+      "reason": "updated"
+    },
+    {
+      "id": 71,
+      "title": "迷糊餐厅 第三季",
+      "originalTitle": "迷糊餐厅 第三季",
+      "beforePremiereDate": null,
+      "queries": [
+        "迷糊餐厅 第三季"
+      ],
+      "provider": {
+        "query": "迷糊餐厅 第三季",
+        "premiereDate": "2015-07-04",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "迷糊餐厅 第三季"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2015-07-04",
+      "reason": "updated"
+    },
+    {
+      "id": 72,
+      "title": "南家三姐妹 第一季",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "南家三姐妹 第一季"
+      ],
+      "provider": {
+        "query": "南家三姐妹 第一季",
+        "premiereDate": null,
+        "premiereDateSource": null,
+        "decision": "missing_date"
+      },
+      "ai": {
+        "used": true,
+        "premiereDate": "2007-10-07",
+        "confidence": 0.9,
+        "decision": "accepted"
+      },
+      "outcome": "updated",
+      "source": "ai",
+      "afterPremiereDate": "2007-10-07",
+      "reason": "updated"
+    },
+    {
+      "id": 73,
+      "title": "南家三姐妹 再来一碗",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "南家三姐妹 再来一碗"
+      ],
+      "provider": {
+        "query": "南家三姐妹 再来一碗",
+        "premiereDate": "2008-01-06",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "南家三姐妹 再来一碗"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2008-01-06",
+      "reason": "updated"
+    },
+    {
+      "id": 75,
+      "title": "多田君不恋爱",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "多田君不恋爱"
+      ],
+      "provider": {
+        "query": "多田君不恋爱",
+        "premiereDate": "2018-04-05",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "多田君不恋爱"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2018-04-05",
+      "reason": "updated"
+    },
+    {
+      "id": 76,
+      "title": "关于前辈很烦人这件事",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "关于前辈很烦人这件事"
+      ],
+      "provider": {
+        "query": "关于前辈很烦人这件事",
+        "premiereDate": null,
+        "premiereDateSource": null,
+        "decision": "missing_date"
+      },
+      "ai": {
+        "used": true,
+        "premiereDate": "2021-10-10",
+        "confidence": 0.9,
+        "decision": "accepted"
+      },
+      "outcome": "updated",
+      "source": "ai",
+      "afterPremiereDate": "2021-10-10",
+      "reason": "updated"
+    },
+    {
+      "id": 77,
+      "title": "跟班×服务",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "跟班×服务"
+      ],
+      "provider": {
+        "query": "跟班×服务",
+        "premiereDate": "2013-07-04",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "跟班×服务"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2013-07-04",
+      "reason": "updated"
+    },
+    {
+      "id": 78,
+      "title": "我们大家的河合庄",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "我们大家的河合庄"
+      ],
+      "provider": {
+        "query": "我们大家的河合庄",
+        "premiereDate": "2014-04-03",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "我们大家的河合庄"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2014-04-03",
+      "reason": "updated"
+    },
+    {
+      "id": 79,
+      "title": "中二病也要谈恋爱！",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "中二病也要谈恋爱！"
+      ],
+      "provider": {
+        "query": "中二病也要谈恋爱！",
+        "premiereDate": "2012-10-03",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "中二病也要谈恋爱！"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2012-10-03",
+      "reason": "updated"
+    },
+    {
+      "id": 80,
+      "title": "中二病也要谈恋爱！恋",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "中二病也要谈恋爱！恋"
+      ],
+      "provider": {
+        "query": "中二病也要谈恋爱！恋",
+        "premiereDate": "2014-01-08",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "中二病也要谈恋爱！恋"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2014-01-08",
+      "reason": "updated"
+    },
+    {
+      "id": 81,
+      "title": "Anne Happy♪",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "Anne Happy♪"
+      ],
+      "provider": {
+        "query": "Anne Happy♪",
+        "premiereDate": "2016-04-07",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "Anne Happy♪"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2016-04-07",
+      "reason": "updated"
+    },
+    {
+      "id": 82,
+      "title": "古见同学有交流障碍症",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "古见同学有交流障碍症"
+      ],
+      "provider": {
+        "query": "古见同学有交流障碍症",
+        "premiereDate": "2021-10-06",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "古见同学有交流障碍症"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2021-10-06",
+      "reason": "updated"
+    },
+    {
+      "id": 83,
+      "title": "向山进发 第一季",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "向山进发 第一季"
+      ],
+      "provider": {
+        "query": "向山进发 第一季",
+        "premiereDate": "2018-07-02",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "向山进发 第一季"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2018-07-02",
+      "reason": "updated"
+    },
+    {
+      "id": 84,
+      "title": "向山进发 第二季",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "向山进发 第二季"
+      ],
+      "provider": {
+        "query": "向山进发 第二季",
+        "premiereDate": "2014-07-09",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "向山进发 第二季"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2014-07-09",
+      "reason": "updated"
+    },
+    {
+      "id": 85,
+      "title": "向山进发 第三季",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "向山进发 第三季"
+      ],
+      "provider": {
+        "query": "向山进发 第三季",
+        "premiereDate": "2018-07-02",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "向山进发 第三季"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2018-07-02",
+      "reason": "updated"
+    },
+    {
+      "id": 89,
+      "title": "向山进发 第四季",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "向山进发 第四季"
+      ],
+      "provider": {
+        "query": "向山进发 第四季",
+        "premiereDate": "2022-01-23",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "向山进发 第四季"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2022-01-23",
+      "reason": "updated"
+    },
+    {
+      "id": 90,
+      "title": "宇崎学妹想要玩 第一季",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "宇崎学妹想要玩 第一季"
+      ],
+      "provider": {
+        "query": "宇崎学妹想要玩 第一季",
+        "premiereDate": "2022-10-01",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "宇崎学妹想要玩 第一季"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2022-10-01",
+      "reason": "updated"
+    },
+    {
+      "id": 91,
+      "title": "宇崎学妹想要玩 第二季",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "宇崎学妹想要玩 第二季"
+      ],
+      "provider": {
+        "query": "宇崎学妹想要玩 第二季",
+        "premiereDate": "2022-10-01",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "宇崎学妹想要玩 第二季"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2022-10-01",
+      "reason": "updated"
+    },
+    {
+      "id": 92,
+      "title": "辉夜大小姐想让我告白 第一季",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "辉夜大小姐想让我告白 第一季"
+      ],
+      "provider": {
+        "query": "辉夜大小姐想让我告白 第一季",
+        "premiereDate": "2022-04-08",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "辉夜大小姐想让我告白 第一季"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2022-04-08",
+      "reason": "updated"
+    },
+    {
+      "id": 93,
+      "title": "辉夜大小姐想让我告白 第二季",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "辉夜大小姐想让我告白 第二季"
+      ],
+      "provider": {
+        "query": "辉夜大小姐想让我告白 第二季",
+        "premiereDate": "2022-04-08",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "辉夜大小姐想让我告白 第二季"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2022-04-08",
+      "reason": "updated"
+    },
+    {
+      "id": 94,
+      "title": "辉夜大小姐想让我告白 第三季",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "辉夜大小姐想让我告白 第三季"
+      ],
+      "provider": {
+        "query": "辉夜大小姐想让我告白 第三季",
+        "premiereDate": "2022-04-08",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "辉夜大小姐想让我告白 第三季"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2022-04-08",
+      "reason": "updated"
+    },
+    {
+      "id": 95,
+      "title": "牵牛花与加濑同学",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "牵牛花与加濑同学"
+      ],
+      "provider": {
+        "query": "牵牛花与加濑同学",
+        "premiereDate": "2018-11-21",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "牵牛花与加濑同学"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2018-11-21",
+      "reason": "updated"
+    },
+    {
+      "id": 96,
+      "title": "摇曳露营△ 第一季",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "摇曳露营△ 第一季"
+      ],
+      "provider": {
+        "query": "摇曳露营△ 第一季",
+        "premiereDate": "2021-01-07",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "摇曳露营△ 第一季"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2021-01-07",
+      "reason": "updated"
+    },
+    {
+      "id": 97,
+      "title": "摇曳露营△ 第二季",
+      "originalTitle": "摇曳露营△ 第二季",
+      "beforePremiereDate": null,
+      "queries": [
+        "摇曳露营△ 第二季"
+      ],
+      "provider": {
+        "query": "摇曳露营△ 第二季",
+        "premiereDate": "2021-01-07",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "摇曳露营△ 第二季"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2021-01-07",
+      "reason": "updated"
+    },
+    {
+      "id": 98,
+      "title": "漫画女孩",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "漫画女孩"
+      ],
+      "provider": {
+        "query": "漫画女孩",
+        "premiereDate": "2018-04-05",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "漫画女孩"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2018-04-05",
+      "reason": "updated"
+    },
+    {
+      "id": 99,
+      "title": "白圣女与黑牧师",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "白圣女与黑牧师"
+      ],
+      "provider": {
+        "query": "白圣女与黑牧师",
+        "premiereDate": "2023-07-12",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "白圣女与黑牧师"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2023-07-12",
+      "reason": "updated"
+    },
+    {
+      "id": 100,
+      "title": "未确认进行式",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "未确认进行式"
+      ],
+      "provider": {
+        "query": "未确认进行式",
+        "premiereDate": "2014-01-08",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "未确认进行式"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2014-01-08",
+      "reason": "updated"
+    },
+    {
+      "id": 101,
+      "title": "相合之物",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "相合之物"
+      ],
+      "provider": {
+        "query": "相合之物",
+        "premiereDate": "2022-04-06",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "相合之物"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2022-04-06",
+      "reason": "updated"
+    },
+    {
+      "id": 102,
+      "title": "明日酱的水手服",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "明日酱的水手服"
+      ],
+      "provider": {
+        "query": "明日酱的水手服",
+        "premiereDate": "2022-01-08",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "明日酱的水手服"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2022-01-08",
+      "reason": "updated"
+    },
+    {
+      "id": 103,
+      "title": "摇曳露营△ 第三季",
+      "originalTitle": "摇曳露营△ 第三季",
+      "beforePremiereDate": null,
+      "queries": [
+        "摇曳露营△ 第三季"
+      ],
+      "provider": {
+        "query": "摇曳露营△ 第三季",
+        "premiereDate": "2024-04-04",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "摇曳露营△ 第三季"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2024-04-04",
+      "reason": "updated"
+    },
+    {
+      "id": 104,
+      "title": "摇曳百合 第一季",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "摇曳百合 第一季"
+      ],
+      "provider": {
+        "query": "摇曳百合 第一季",
+        "premiereDate": "2012-07-02",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "摇曳百合 第一季"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2012-07-02",
+      "reason": "updated"
+    },
+    {
+      "id": 105,
+      "title": "雏子的笔记",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "雏子的笔记"
+      ],
+      "provider": {
+        "query": "雏子的笔记",
+        "premiereDate": "2017-04-07",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "雏子的笔记"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2017-04-07",
+      "reason": "updated"
+    },
+    {
+      "id": 106,
+      "title": "Urara迷路帖",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "Urara迷路帖"
+      ],
+      "provider": {
+        "query": "Urara迷路帖",
+        "premiereDate": "2017-01-05",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "Urara迷路帖"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2017-01-05",
+      "reason": "updated"
+    },
+    {
+      "id": 107,
+      "title": "黄金拼图",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "黄金拼图"
+      ],
+      "provider": {
+        "query": "黄金拼图",
+        "premiereDate": "2013-07-06",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "黄金拼图"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2013-07-06",
+      "reason": "updated"
+    },
+    {
+      "id": 108,
+      "title": "满溢的水果挞",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "满溢的水果挞"
+      ],
+      "provider": {
+        "query": "满溢的水果挞",
+        "premiereDate": "2020-10-12",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "满溢的水果挞"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2020-10-12",
+      "reason": "updated"
+    },
+    {
+      "id": 109,
+      "title": "城下町的蒲公英",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "城下町的蒲公英"
+      ],
+      "provider": {
+        "query": "城下町的蒲公英",
+        "premiereDate": "2015-07-02",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "城下町的蒲公英"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2015-07-02",
+      "reason": "updated"
+    },
+    {
+      "id": 110,
+      "title": "魔女之旅",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "魔女之旅"
+      ],
+      "provider": {
+        "query": "魔女之旅",
+        "premiereDate": "2020-10-02",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "魔女之旅"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2020-10-02",
+      "reason": "updated"
+    },
+    {
+      "id": 111,
+      "title": "为美好的世界献上祝福！",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "为美好的世界献上祝福！"
+      ],
+      "provider": {
+        "query": "为美好的世界献上祝福！",
+        "premiereDate": "2016-01-13",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "为美好的世界献上祝福！"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2016-01-13",
+      "reason": "updated"
+    },
+    {
+      "id": 112,
+      "title": "因为太怕痛就全点防御力了",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "因为太怕痛就全点防御力了"
+      ],
+      "provider": {
+        "query": "因为太怕痛就全点防御力了",
+        "premiereDate": "2020-01-08",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "因为太怕痛就全点防御力了"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2020-01-08",
+      "reason": "updated"
+    },
+    {
+      "id": 113,
+      "title": "一个人的○○小日子",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "一个人的○○小日子"
+      ],
+      "provider": {
+        "query": "一个人的○○小日子",
+        "premiereDate": "2019-04-05",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "一个人的○○小日子"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2019-04-05",
+      "reason": "updated"
+    },
+    {
+      "id": 114,
+      "title": "黄金拼图 第二季",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "黄金拼图 第二季"
+      ],
+      "provider": {
+        "query": "黄金拼图 第二季",
+        "premiereDate": "2015-04-05",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "黄金拼图 第二季"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2015-04-05",
+      "reason": "updated"
+    },
+    {
+      "id": 115,
+      "title": "黄金拼图 Pretty Days",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "黄金拼图 Pretty Days"
+      ],
+      "provider": {
+        "query": "黄金拼图 Pretty Days",
+        "premiereDate": "2016-11-12",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "黄金拼图 Pretty Days"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2016-11-12",
+      "reason": "updated"
+    },
+    {
+      "id": 116,
+      "title": "轻音少女 剧场版",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "轻音少女 剧场版"
+      ],
+      "provider": {
+        "query": "轻音少女 剧场版",
+        "premiereDate": "2011-12-03",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "轻音少女 剧场版"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2011-12-03",
+      "reason": "updated"
+    },
+    {
+      "id": 117,
+      "title": "紫罗兰永恒花园",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "紫罗兰永恒花园"
+      ],
+      "provider": {
+        "query": "紫罗兰永恒花园",
+        "premiereDate": "2018-01-10",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "紫罗兰永恒花园"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2018-01-10",
+      "reason": "updated"
+    },
+    {
+      "id": 118,
+      "title": "干物妹！小埋",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "干物妹！小埋"
+      ],
+      "provider": {
+        "query": "干物妹！小埋",
+        "premiereDate": "2015-07-08",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "干物妹！小埋"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2015-07-08",
+      "reason": "updated"
+    },
+    {
+      "id": 119,
+      "title": "干物妹！小埋R",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "干物妹！小埋R"
+      ],
+      "provider": {
+        "query": "干物妹！小埋R",
+        "premiereDate": "2017-10-08",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "干物妹！小埋R"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2017-10-08",
+      "reason": "updated"
+    },
+    {
+      "id": 120,
+      "title": "冰菓",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "冰菓"
+      ],
+      "provider": {
+        "query": "冰菓",
+        "premiereDate": "2012-04-22",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "冰菓"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2012-04-22",
+      "reason": "updated"
+    },
+    {
+      "id": 121,
+      "title": "玉子爱情故事",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "玉子爱情故事"
+      ],
+      "provider": {
+        "query": "玉子爱情故事",
+        "premiereDate": "2014-04-26",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "玉子爱情故事"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2014-04-26",
+      "reason": "updated"
+    },
+    {
+      "id": 122,
+      "title": "打工吧！魔王大人",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "打工吧！魔王大人"
+      ],
+      "provider": {
+        "query": "打工吧！魔王大人",
+        "premiereDate": "2013-04-04",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "打工吧！魔王大人"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2013-04-04",
+      "reason": "updated"
+    },
+    {
+      "id": 123,
+      "title": "小林家的龙女仆",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "小林家的龙女仆"
+      ],
+      "provider": {
+        "query": "小林家的龙女仆",
+        "premiereDate": "2017-01-11",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "小林家的龙女仆"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2017-01-11",
+      "reason": "updated"
+    },
+    {
+      "id": 124,
+      "title": "小林家的龙女仆S",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "小林家的龙女仆S"
+      ],
+      "provider": {
+        "query": "小林家的龙女仆S",
+        "premiereDate": "2021-07-07",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "小林家的龙女仆S"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2021-07-07",
+      "reason": "updated"
+    },
+    {
+      "id": 125,
+      "title": "ENDRO～！",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "ENDRO～！"
+      ],
+      "provider": {
+        "query": "ENDRO～！",
+        "premiereDate": "2019-01-12",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "ENDRO～！"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2019-01-12",
+      "reason": "updated"
+    },
+    {
+      "id": 126,
+      "title": "埃罗芒阿老师",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "埃罗芒阿老师"
+      ],
+      "provider": {
+        "query": "埃罗芒阿老师",
+        "premiereDate": "2017-04-08",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "埃罗芒阿老师"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2017-04-08",
+      "reason": "updated"
+    },
+    {
+      "id": 127,
+      "title": "我的青春恋爱物语果然有问题",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "我的青春恋爱物语果然有问题"
+      ],
+      "provider": {
+        "query": "我的青春恋爱物语果然有问题",
+        "premiereDate": "2013-04-04",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "我的青春恋爱物语果然有问题"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2013-04-04",
+      "reason": "updated"
+    },
+    {
+      "id": 128,
+      "title": "我的青春恋爱物语果然有问题 续",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "我的青春恋爱物语果然有问题 续"
+      ],
+      "provider": {
+        "query": "我的青春恋爱物语果然有问题 续",
+        "premiereDate": "2015-04-02",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "我的青春恋爱物语果然有问题 续"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2015-04-02",
+      "reason": "updated"
+    },
+    {
+      "id": 129,
+      "title": "笨蛋、测验、召唤兽",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "笨蛋、测验、召唤兽"
+      ],
+      "provider": {
+        "query": "笨蛋、测验、召唤兽",
+        "premiereDate": "2010-01-06",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "笨蛋、测验、召唤兽"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2010-01-06",
+      "reason": "updated"
+    },
+    {
+      "id": 130,
+      "title": "笨蛋、测验、召唤兽 第二季",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "笨蛋、测验、召唤兽 第二季"
+      ],
+      "provider": {
+        "query": "笨蛋、测验、召唤兽 第二季",
+        "premiereDate": "2011-07-07",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "笨蛋、测验、召唤兽 第二季"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2011-07-07",
+      "reason": "updated"
+    },
+    {
+      "id": 131,
+      "title": "属性咖啡厅",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "属性咖啡厅"
+      ],
+      "provider": {
+        "query": "属性咖啡厅",
+        "premiereDate": "2017-10-07",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "属性咖啡厅"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2017-10-07",
+      "reason": "updated"
+    },
+    {
+      "id": 132,
+      "title": "男子高中生的日常",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "男子高中生的日常"
+      ],
+      "provider": {
+        "query": "男子高中生的日常",
+        "premiereDate": "2012-01-09",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "男子高中生的日常"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2012-01-09",
+      "reason": "updated"
+    },
+    {
+      "id": 133,
+      "title": "女高中生的虚度日常",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "女高中生的虚度日常"
+      ],
+      "provider": {
+        "query": "女高中生的虚度日常",
+        "premiereDate": "2019-07-05",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "女高中生的虚度日常"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2019-07-05",
+      "reason": "updated"
+    },
+    {
+      "id": 134,
+      "title": "街角魔族",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "街角魔族"
+      ],
+      "provider": {
+        "query": "街角魔族",
+        "premiereDate": "2019-07-11",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "街角魔族"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2019-07-11",
+      "reason": "updated"
+    },
+    {
+      "id": 135,
+      "title": "街角魔族 第二季",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "街角魔族 第二季"
+      ],
+      "provider": {
+        "query": "街角魔族 第二季",
+        "premiereDate": null,
+        "premiereDateSource": null,
+        "decision": "missing_date"
+      },
+      "ai": {
+        "used": true,
+        "premiereDate": "2022-04-07",
+        "confidence": 0.9,
+        "decision": "accepted"
+      },
+      "outcome": "updated",
+      "source": "ai",
+      "afterPremiereDate": "2022-04-07",
+      "reason": "updated"
+    },
+    {
+      "id": 136,
+      "title": "赛马娘 Pretty Derby 第一季",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "赛马娘 Pretty Derby 第一季"
+      ],
+      "provider": {
+        "query": "赛马娘 Pretty Derby 第一季",
+        "premiereDate": "2021-01-04",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "赛马娘 Pretty Derby 第一季"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2021-01-04",
+      "reason": "updated"
+    },
+    {
+      "id": 137,
+      "title": "22/7",
+      "originalTitle": "22/7",
+      "beforePremiereDate": null,
+      "queries": [
+        "22/7"
+      ],
+      "provider": {
+        "query": "22/7",
+        "premiereDate": "2020-01-11",
+        "premiereDateSource": {
+          "site": "jikan",
+          "query": "22/7",
+          "score": 120,
+          "selectedTitle": "22/7"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2020-01-11",
+      "reason": "updated"
+    },
+    {
+      "id": 138,
+      "title": "Love Live! 虹咲学园学园偶像同好会",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "Love Live! 虹咲学园学园偶像同好会"
+      ],
+      "provider": {
+        "query": "Love Live! 虹咲学园学园偶像同好会",
+        "premiereDate": null,
+        "premiereDateSource": null,
+        "decision": "missing_date"
+      },
+      "ai": {
+        "used": true,
+        "premiereDate": "2020-10-03",
+        "confidence": 0.9,
+        "decision": "accepted"
+      },
+      "outcome": "updated",
+      "source": "ai",
+      "afterPremiereDate": "2020-10-03",
+      "reason": "updated"
+    },
+    {
+      "id": 139,
+      "title": "Love Live! Sunshine!!",
+      "originalTitle": "ラブライブ！サンシャイン!!",
+      "beforePremiereDate": null,
+      "queries": [
+        "ラブライブ！サンシャイン!!",
+        "Love Live! Sunshine!!"
+      ],
+      "provider": {
+        "query": "Love Live! Sunshine!!",
+        "premiereDate": "2016-07-02",
+        "premiereDateSource": {
+          "site": "jikan",
+          "query": "Love Live! Sunshine!!",
+          "score": 120,
+          "selectedTitle": "Love Live! Sunshine!!"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2016-07-02",
+      "reason": "updated"
+    },
+    {
+      "id": 141,
+      "title": "Love Live! 超级明星!!",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "Love Live! 超级明星!!"
+      ],
+      "provider": {
+        "query": "Love Live! 超级明星!!",
+        "premiereDate": null,
+        "premiereDateSource": null,
+        "decision": "missing_date"
+      },
+      "ai": {
+        "used": true,
+        "premiereDate": "2021-07-11",
+        "confidence": 0.9,
+        "decision": "accepted"
+      },
+      "outcome": "updated",
+      "source": "ai",
+      "afterPremiereDate": "2021-07-11",
+      "reason": "updated"
+    },
+    {
+      "id": 142,
+      "title": "NEW GAME!",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "NEW GAME!"
+      ],
+      "provider": {
+        "query": "NEW GAME!",
+        "premiereDate": "2017-07-11",
+        "premiereDateSource": {
+          "site": "jikan",
+          "query": "NEW GAME!",
+          "score": 120,
+          "selectedTitle": "New Game!!"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2017-07-11",
+      "reason": "updated"
+    },
+    {
+      "id": 143,
+      "title": "NEW GAME!! 第二季",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "NEW GAME!! 第二季"
+      ],
+      "provider": {
+        "query": "NEW GAME!! 第二季",
+        "premiereDate": null,
+        "premiereDateSource": null,
+        "decision": "missing_date"
+      },
+      "ai": {
+        "used": true,
+        "premiereDate": "2017-07-11",
+        "confidence": 0.9,
+        "decision": "accepted"
+      },
+      "outcome": "updated",
+      "source": "ai",
+      "afterPremiereDate": "2017-07-11",
+      "reason": "updated"
+    },
+    {
+      "id": 144,
+      "title": "月が導く異世界道中",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "月が導く異世界道中"
+      ],
+      "provider": {
+        "query": "月が導く異世界道中",
+        "premiereDate": "2021-07-07",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "月が導く異世界道中"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2021-07-07",
+      "reason": "updated"
+    },
+    {
+      "id": 145,
+      "title": "月光下的异世界之旅 第二季",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "月光下的异世界之旅 第二季"
+      ],
+      "provider": {
+        "query": "月光下的异世界之旅 第二季",
+        "premiereDate": "2024-01-08",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "月光下的异世界之旅 第二季"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2024-01-08",
+      "reason": "updated"
+    },
+    {
+      "id": 146,
+      "title": "别当欧尼酱了",
+      "originalTitle": "お兄ちゃんはおしまい！",
+      "beforePremiereDate": null,
+      "queries": [
+        "お兄ちゃんはおしまい！",
+        "别当欧尼酱了"
+      ],
+      "provider": {
+        "query": "お兄ちゃんはおしまい！",
+        "premiereDate": "2023-01-05",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "お兄ちゃんはおしまい！"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2023-01-05",
+      "reason": "updated"
+    },
+    {
+      "id": 147,
+      "title": "这个治疗师有点烦",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "这个治疗师有点烦"
+      ],
+      "provider": {
+        "query": "这个治疗师有点烦",
+        "premiereDate": "2022-04-10",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "这个治疗师有点烦"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2022-04-10",
+      "reason": "updated"
+    },
+    {
+      "id": 148,
+      "title": "莉可丽丝",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "莉可丽丝"
+      ],
+      "provider": {
+        "query": "莉可丽丝",
+        "premiereDate": "2022-07-02",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "莉可丽丝"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2022-07-02",
+      "reason": "updated"
+    },
+    {
+      "id": 149,
+      "title": "转生公主与天才千金的魔法革命",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "转生公主与天才千金的魔法革命"
+      ],
+      "provider": {
+        "query": "转生公主与天才千金的魔法革命",
+        "premiereDate": "2023-01-04",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "转生公主与天才千金的魔法革命"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2023-01-04",
+      "reason": "updated"
+    },
+    {
+      "id": 151,
+      "title": "安达与岛村",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "安达与岛村"
+      ],
+      "provider": {
+        "query": "安达与岛村",
+        "premiereDate": "2020-10-08",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "安达与岛村"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2020-10-08",
+      "reason": "updated"
+    },
+    {
+      "id": 152,
+      "title": "恋爱实验室",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "恋爱实验室"
+      ],
+      "provider": {
+        "query": "恋爱实验室",
+        "premiereDate": "2013-07-04",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "恋爱实验室"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2013-07-04",
+      "reason": "updated"
+    },
+    {
+      "id": 153,
+      "title": "街角魔族 第三季",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "街角魔族 第三季"
+      ],
+      "provider": {
+        "query": "街角魔族 第三季",
+        "premiereDate": null,
+        "premiereDateSource": null,
+        "decision": "missing_date"
+      },
+      "ai": {
+        "used": true,
+        "premiereDate": null,
+        "confidence": 0,
+        "decision": "missing_date"
+      },
+      "outcome": "skip",
+      "source": null,
+      "afterPremiereDate": null,
+      "reason": "missing_date; missing_date"
+    },
+    {
+      "id": 154,
+      "title": "摇曳百合 暑假时光！+",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "摇曳百合 暑假时光！+"
+      ],
+      "provider": {
+        "query": "摇曳百合 暑假时光！+",
+        "premiereDate": "2015-02-18",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "摇曳百合 暑假时光！+"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2015-02-18",
+      "reason": "updated"
+    },
+    {
+      "id": 155,
+      "title": "魔法禁书目录",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "魔法禁书目录"
+      ],
+      "provider": {
+        "query": "魔法禁书目录",
+        "premiereDate": "2008-10-04",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "魔法禁书目录"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2008-10-04",
+      "reason": "updated"
+    },
+    {
+      "id": 156,
+      "title": "某科学的超电磁炮",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "某科学的超电磁炮"
+      ],
+      "provider": {
+        "query": "某科学的超电磁炮",
+        "premiereDate": "2009-10-02",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "某科学的超电磁炮"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2009-10-02",
+      "reason": "updated"
+    },
+    {
+      "id": 157,
+      "title": "某科学的一方通行",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "某科学的一方通行"
+      ],
+      "provider": {
+        "query": "某科学的一方通行",
+        "premiereDate": "2019-07-12",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "某科学的一方通行"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2019-07-12",
+      "reason": "updated"
+    },
+    {
+      "id": 158,
+      "title": "魔法禁书目录 第二季",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "魔法禁书目录 第二季"
+      ],
+      "provider": {
+        "query": "魔法禁书目录 第二季",
+        "premiereDate": "2010-10-08",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "魔法禁书目录 第二季"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2010-10-08",
+      "reason": "updated"
+    },
+    {
+      "id": 159,
+      "title": "魔法禁书目录 第三季",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "魔法禁书目录 第三季"
+      ],
+      "provider": {
+        "query": "魔法禁书目录 第三季",
+        "premiereDate": "2018-10-05",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "魔法禁书目录 第三季"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2018-10-05",
+      "reason": "updated"
+    },
+    {
+      "id": 160,
+      "title": "某科学的超电磁炮 第二季",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "某科学的超电磁炮 第二季"
+      ],
+      "provider": {
+        "query": "某科学的超电磁炮 第二季",
+        "premiereDate": null,
+        "premiereDateSource": null,
+        "decision": "missing_date"
+      },
+      "ai": {
+        "used": true,
+        "premiereDate": "2013-04-12",
+        "confidence": 0.9,
+        "decision": "accepted"
+      },
+      "outcome": "updated",
+      "source": "ai",
+      "afterPremiereDate": "2013-04-12",
+      "reason": "updated"
+    },
+    {
+      "id": 161,
+      "title": "黑色四叶草",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "黑色四叶草"
+      ],
+      "provider": {
+        "query": "黑色四叶草",
+        "premiereDate": "2017-10-03",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "黑色四叶草"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2017-10-03",
+      "reason": "updated"
+    },
+    {
+      "id": 162,
+      "title": "里亚德录大地",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "里亚德录大地"
+      ],
+      "provider": {
+        "query": "里亚德录大地",
+        "premiereDate": "2022-01-05",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "里亚德录大地"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2022-01-05",
+      "reason": "updated"
+    },
+    {
+      "id": 163,
+      "title": "天才王子的赤字国家振兴术",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "天才王子的赤字国家振兴术"
+      ],
+      "provider": {
+        "query": "天才王子的赤字国家振兴术",
+        "premiereDate": "2022-01-11",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "天才王子的赤字国家振兴术"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2022-01-11",
+      "reason": "updated"
+    },
+    {
+      "id": 164,
+      "title": "间谍过家家 第一季",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "间谍过家家 第一季"
+      ],
+      "provider": {
+        "query": "间谍过家家 第一季",
+        "premiereDate": "2025-10-04",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "间谍过家家 第一季"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2025-10-04",
+      "reason": "updated"
+    },
+    {
+      "id": 165,
+      "title": "葬送的芙莉莲 第一季",
+      "originalTitle": "葬送のフリーレン",
+      "beforePremiereDate": null,
+      "queries": [
+        "葬送のフリーレン",
+        "葬送的芙莉莲 第一季"
+      ],
+      "provider": {
+        "query": "葬送のフリーレン",
+        "premiereDate": "2023-09-29",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "葬送のフリーレン"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2023-09-29",
+      "reason": "updated"
+    },
+    {
+      "id": 166,
+      "title": "转生成蜘蛛又怎样！",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "转生成蜘蛛又怎样！"
+      ],
+      "provider": {
+        "query": "转生成蜘蛛又怎样！",
+        "premiereDate": "2021-01-08",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "转生成蜘蛛又怎样！"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2021-01-08",
+      "reason": "updated"
+    },
+    {
+      "id": 167,
+      "title": "打了三百年史莱姆，不知不觉就练到了满级",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "打了三百年史莱姆，不知不觉就练到了满级"
+      ],
+      "provider": {
+        "query": "打了三百年史莱姆，不知不觉就练到了满级",
+        "premiereDate": "2021-04-10",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "打了三百年史莱姆，不知不觉就练到了满级"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2021-04-10",
+      "reason": "updated"
+    },
+    {
+      "id": 168,
+      "title": "因为太怕痛就全点防御力了。 第二季",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "因为太怕痛就全点防御力了。 第二季"
+      ],
+      "provider": {
+        "query": "因为太怕痛就全点防御力了。 第二季",
+        "premiereDate": "2023-01-11",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "因为太怕痛就全点防御力了。 第二季"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2023-01-11",
+      "reason": "updated"
+    },
+    {
+      "id": 171,
+      "title": "葬送的芙莉莲 第二季",
+      "originalTitle": "葬送的芙莉莲 第二季",
+      "beforePremiereDate": null,
+      "queries": [
+        "葬送的芙莉莲 第二季"
+      ],
+      "provider": {
+        "query": "葬送的芙莉莲 第二季",
+        "premiereDate": "2026-01-16",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "葬送的芙莉莲 第二季"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2026-01-16",
+      "reason": "updated"
+    },
+    {
+      "id": 175,
+      "title": "Re:Stage！Dream Days♪",
+      "originalTitle": "Re:ステージ！ドリームデイズ♪",
+      "beforePremiereDate": null,
+      "queries": [
+        "Re:ステージ！ドリームデイズ♪",
+        "Re:Stage！Dream Days♪"
+      ],
+      "provider": {
+        "query": "Re:ステージ！ドリームデイズ♪",
+        "premiereDate": "2019-07-07",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "Re:ステージ！ドリームデイズ♪"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2019-07-07",
+      "reason": "updated"
+    },
+    {
+      "id": 176,
+      "title": "摇曳露营△ 剧场版",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "摇曳露营△ 剧场版"
+      ],
+      "provider": {
+        "query": "摇曳露营△ 剧场版",
+        "premiereDate": null,
+        "premiereDateSource": null,
+        "decision": "missing_date"
+      },
+      "ai": {
+        "used": true,
+        "premiereDate": "2022-07-01",
+        "confidence": 0.9,
+        "decision": "accepted"
+      },
+      "outcome": "updated",
+      "source": "ai",
+      "afterPremiereDate": "2022-07-01",
+      "reason": "updated"
+    },
+    {
+      "id": 179,
+      "title": "间谍过家家 第三季",
+      "originalTitle": "SPY×FAMILY Season 3",
+      "beforePremiereDate": null,
+      "queries": [
+        "SPY×FAMILY Season 3",
+        "间谍过家家 第三季"
+      ],
+      "provider": {
+        "query": "SPY×FAMILY Season 3",
+        "premiereDate": "2025-10-04",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "SPY×FAMILY Season 3"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2025-10-04",
+      "reason": "updated"
+    },
+    {
+      "id": 181,
+      "title": "放学后海堤日记",
+      "originalTitle": "放課後ていぼう日誌",
+      "beforePremiereDate": null,
+      "queries": [
+        "放課後ていぼう日誌",
+        "放学后海堤日记"
+      ],
+      "provider": {
+        "query": "放課後ていぼう日誌",
+        "premiereDate": "2020-04-07",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "放課後ていぼう日誌"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2020-04-07",
+      "reason": "updated"
+    },
+    {
+      "id": 182,
+      "title": "看得见的女孩",
+      "originalTitle": "阴阳眼见子",
+      "beforePremiereDate": null,
+      "queries": [
+        "阴阳眼见子",
+        "看得见的女孩"
+      ],
+      "provider": {
+        "query": "阴阳眼见子",
+        "premiereDate": "2021-10-03",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "阴阳眼见子"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2021-10-03",
+      "reason": "updated"
+    },
+    {
+      "id": 183,
+      "title": "我心里危险的东西 第二季",
+      "originalTitle": "Boku no Kokoro no Yabai Yatsu Season 1",
+      "beforePremiereDate": null,
+      "queries": [
+        "Boku no Kokoro no Yabai Yatsu Season 1",
+        "我心里危险的东西 第二季"
+      ],
+      "provider": {
+        "query": "Boku no Kokoro no Yabai Yatsu Season 1",
+        "premiereDate": "2024-01-06",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "Boku no Kokoro no Yabai Yatsu Season 1"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2024-01-06",
+      "reason": "updated"
+    },
+    {
+      "id": 74,
+      "title": "南家三姐妹 欢迎回来",
+      "originalTitle": null,
+      "beforePremiereDate": null,
+      "queries": [
+        "南家三姐妹 欢迎回来"
+      ],
+      "provider": {
+        "query": "南家三姐妹 欢迎回来",
+        "premiereDate": "2009-01-04",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "南家三姐妹 欢迎回来"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2009-01-04",
+      "reason": "updated"
+    },
+    {
+      "id": 24,
+      "title": "魔女与使魔",
+      "originalTitle": "魔女と使い魔",
+      "beforePremiereDate": null,
+      "queries": [
+        "魔女と使い魔",
+        "魔女与使魔"
+      ],
+      "provider": {
+        "query": "魔女と使い魔",
+        "premiereDate": null,
+        "premiereDateSource": null,
+        "decision": "missing_date"
+      },
+      "ai": {
+        "used": true,
+        "premiereDate": null,
+        "confidence": 0,
+        "decision": "missing_date"
+      },
+      "outcome": "skip",
+      "source": null,
+      "afterPremiereDate": null,
+      "reason": "missing_date; missing_date"
+    },
+    {
+      "id": 35,
+      "title": "这里是充满笑容的职场。",
+      "originalTitle": "ここは笑顔であふれる職場。",
+      "beforePremiereDate": null,
+      "queries": [
+        "ここは笑顔であふれる職場。",
+        "这里是充满笑容的职场。"
+      ],
+      "provider": {
+        "query": "这里是充满笑容的职场。",
+        "premiereDate": "2025-10-06",
+        "premiereDateSource": {
+          "site": "bangumi",
+          "query": "这里是充满笑容的职场。"
+        },
+        "decision": "accepted"
+      },
+      "ai": {
+        "used": false,
+        "premiereDate": null,
+        "confidence": null,
+        "decision": null
+      },
+      "outcome": "updated",
+      "source": "provider",
+      "afterPremiereDate": "2025-10-06",
+      "reason": "updated"
+    }
+  ]
+}

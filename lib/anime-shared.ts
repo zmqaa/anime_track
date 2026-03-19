@@ -1,6 +1,6 @@
 export type AnimeStatus = 'watching' | 'completed' | 'dropped' | 'plan_to_watch';
 
-export type AnimeSortBy = 'updatedAt' | 'createdAt' | 'score' | 'progress' | 'title' | 'startDate' | 'endDate';
+export type AnimeSortBy = 'lastWatchedAt' | 'updatedAt' | 'createdAt' | 'score' | 'progress' | 'title' | 'startDate' | 'endDate';
 
 export interface SessionUser {
   role?: string;
@@ -21,6 +21,7 @@ export interface AnimeCardItem {
   startDate?: string;
   endDate?: string;
   isFinished?: boolean;
+  lastWatchedAt?: string;
 }
 
 export interface AnimeListItem extends AnimeCardItem {
@@ -31,7 +32,6 @@ export interface AnimeListItem extends AnimeCardItem {
 }
 
 export interface AnimeDetailItem extends AnimeListItem {
-  originalWork?: string;
   summary?: string;
   premiereDate?: string;
 }

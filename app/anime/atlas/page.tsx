@@ -20,16 +20,32 @@ function formatPremiere(value?: string) {
   return new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: 'short' }).format(date);
 }
 
+function getEpisodeBucketLabel(totalEpisodes?: number) {
+  if (!totalEpisodes || totalEpisodes <= 0) {
+    return undefined;
+  }
+
+  if (totalEpisodes <= 3) return '1-3 集';
+  if (totalEpisodes <= 11) return '4-11 集';
+  if (totalEpisodes <= 13) return '12-13 集';
+  if (totalEpisodes <= 26) return '14-26 集';
+  return '27+ 集';
+}
+
 export default function AnimeAtlasPage() {
   const { parsedHistory, isLoading: historyLoading } = useHistoryData();
   const { animeList, animeTagStats, recentTagStats, isLoading: animeLoading } = useAnimeData(parsedHistory);
 
   const data = useMemo(() => {
-    const originalWorkCounts: Record<string, number> = {};
+    const episodeBucketCounts: Record<string, number> = {};
     const castCounts: Record<string, number> = {};
 
     animeList.forEach((anime) => {
-      if (anime.originalWork?.trim()) originalWorkCounts[anime.originalWork.trim()] = (originalWorkCounts[anime.originalWork.trim()] || 0) + 1;
+      const episodeBucket = getEpisodeBucketLabel(anime.totalEpisodes);
+      if (episodeBucket) {
+        episodeBucketCounts[episodeBucket] = (episodeBucketCounts[episodeBucket] || 0) + 1;
+      }
+
       if (Array.isArray(anime.cast)) {
         anime.cast.forEach((name) => {
           const normalized = String(name || '').trim();
@@ -51,7 +67,7 @@ export default function AnimeAtlasPage() {
 
     const metadataRichness = animeList.length
       ? Math.round(
-          (animeList.filter((anime) => [anime.originalTitle, anime.score, anime.originalWork, Array.isArray(anime.cast) && anime.cast.length > 0 ? 'cast' : '', anime.premiereDate, anime.summary].filter(Boolean).length >= 3).length /
+          (animeList.filter((anime) => [anime.originalTitle, anime.score, anime.totalEpisodes, Array.isArray(anime.cast) && anime.cast.length > 0 ? 'cast' : '', anime.premiereDate, anime.summary].filter(Boolean).length >= 4).length /
             animeList.length) *
             100
         )
@@ -63,7 +79,7 @@ export default function AnimeAtlasPage() {
       topVoiceActors: Object.entries(castCounts)
         .sort((left, right) => right[1] - left[1])
         .slice(0, 6),
-      topOriginalWorks: Object.entries(originalWorkCounts)
+      topEpisodeBuckets: Object.entries(episodeBucketCounts)
         .sort((left, right) => right[1] - left[1])
         .slice(0, 6),
       metadataRichness,
@@ -90,7 +106,7 @@ export default function AnimeAtlasPage() {
             </div>
             <h1 className="text-3xl md:text-4xl font-display font-semibold tracking-tight text-zinc-50">作品元数据图谱</h1>
             <p className="text-sm md:text-base text-zinc-400 leading-7">
-              这里专门展示你的片库由哪些原作类型、声优分布、标签和高分作品构成。比起首页，它更偏向“片库剖面图”。
+              这里专门展示你的片库由哪些集数层级、声优分布、标签和高分作品构成。比起首页，它更偏向“片库剖面图”。
             </p>
           </div>
           <div className="grid grid-cols-2 gap-3 min-w-full lg:min-w-[320px] lg:max-w-[360px]">
@@ -112,24 +128,24 @@ export default function AnimeAtlasPage() {
         <div className="xl:col-span-5 glass-panel rounded-[32px] p-6 lg:p-8">
           <div className="flex items-center gap-3 mb-6">
             <SparklesIcon className="w-5 h-5 text-emerald-300" />
-            <h2 className="text-xl font-display font-semibold text-zinc-100">原作与声优分布</h2>
+            <h2 className="text-xl font-display font-semibold text-zinc-100">集数与声优分布</h2>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="space-y-4">
-              <div className="text-[10px] uppercase tracking-[0.28em] text-zinc-500">Original Works</div>
+              <div className="text-[10px] uppercase tracking-[0.28em] text-zinc-500">Episode Buckets</div>
               <div className="space-y-3">
-                {data.topOriginalWorks.map(([name, count]) => (
+                {data.topEpisodeBuckets.map(([name, count]) => (
                   <div key={name} className="space-y-1.5">
                     <div className="flex items-center justify-between text-sm text-zinc-300">
                       <span>{name}</span>
                       <span className="text-zinc-500">{count} 部</span>
                     </div>
                     <div className="h-2 rounded-full bg-white/5 overflow-hidden">
-                      <div className="h-full rounded-full bg-gradient-to-r from-emerald-300 to-cyan-300" style={{ width: `${(count / Math.max(data.topOriginalWorks[0]?.[1] ?? 1, 1)) * 100}%` }} />
+                      <div className="h-full rounded-full bg-gradient-to-r from-emerald-300 to-cyan-300" style={{ width: `${(count / Math.max(data.topEpisodeBuckets[0]?.[1] ?? 1, 1)) * 100}%` }} />
                     </div>
                   </div>
                 ))}
-                {!data.topOriginalWorks.length && <div className="text-sm text-zinc-500">原作类型还比较稀疏。</div>}
+                {!data.topEpisodeBuckets.length && <div className="text-sm text-zinc-500">总集数字段还比较稀疏。</div>}
               </div>
             </div>
             <div className="space-y-4">
@@ -186,7 +202,7 @@ export default function AnimeAtlasPage() {
                   <span className="text-sm font-medium">AI 补全建议</span>
                 </div>
                 <p className="mt-2 text-sm text-zinc-300 leading-6">
-                  如果这里字段还偏空，可以继续走详情页 AI 补充，originalWork、cast、summary 这些会让图谱更完整。
+                  如果这里字段还偏空，可以继续走详情页 AI 补充，totalEpisodes、premiereDate、cast、summary 这些会让图谱更完整。
                 </p>
               </div>
             </div>
@@ -209,7 +225,7 @@ export default function AnimeAtlasPage() {
                     <div className="min-w-0">
                       <div className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">Score Highlight</div>
                       <div className="mt-1 text-lg text-zinc-100 truncate">{anime.title}</div>
-                      <div className="text-xs text-zinc-500 truncate">{anime.originalTitle ?? anime.originalWork ?? '未补充原名/原作信息'}</div>
+                      <div className="text-xs text-zinc-500 truncate">{anime.originalTitle ?? '未补充原名'}</div>
                     </div>
                     <div className="shrink-0 rounded-full border border-amber-300/20 bg-amber-300/10 px-2.5 py-1 text-sm text-amber-100">
                       {anime.score?.toFixed(1)}
@@ -249,7 +265,7 @@ export default function AnimeAtlasPage() {
                 <Link key={anime.id} href={`/anime/${anime.id}`} className="group flex items-center justify-between gap-3 rounded-[20px] border border-white/5 bg-white/[0.03] px-4 py-3 hover:border-sky-300/20 transition-all">
                   <div className="min-w-0">
                     <div className="text-sm text-zinc-200 truncate">{anime.title}</div>
-                    <div className="text-xs text-zinc-500 truncate">{formatPremiere(anime.premiereDate)} · {anime.originalWork ?? '未补充原作'}</div>
+                    <div className="text-xs text-zinc-500 truncate">{formatPremiere(anime.premiereDate)} · {anime.totalEpisodes ? `${anime.totalEpisodes} 集` : '集数未补充'}</div>
                   </div>
                   <ArrowUpRightIcon className="w-4 h-4 text-zinc-600 group-hover:text-sky-300 transition-colors" />
                 </Link>

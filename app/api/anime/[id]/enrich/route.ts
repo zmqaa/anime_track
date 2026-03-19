@@ -4,6 +4,25 @@ import { authOptions } from '@/lib/auth';
 import { getAnimeRecord, updateAnimeRecord, CreateAnimeDTO } from '@/lib/anime';
 import { enrichAnimeInput } from '@/lib/anime-enrichment';
 
+type MetadataPatchInput = Partial<CreateAnimeDTO>;
+
+const metadataMergePolicy = require('@/lib/metadata/merge-policy.js') as {
+  DEFAULT_METADATA_FIELDS: string[];
+  buildMetadataPatch: (
+    current: Partial<CreateAnimeDTO>,
+    candidateLike: MetadataPatchInput | { candidate: MetadataPatchInput; source?: Record<string, string> },
+    options?: {
+      fields?: string[];
+      force?: boolean;
+      allowReplaceFilledCover?: boolean;
+      allowCastAliasAugment?: boolean;
+      allowIsFinishedUpgrade?: boolean;
+    }
+  ) => { patch: Partial<CreateAnimeDTO>; sources: Record<string, string> };
+};
+
+const { DEFAULT_METADATA_FIELDS, buildMetadataPatch } = metadataMergePolicy;
+
 type SessionUser = {
   role?: string;
 };
@@ -14,26 +33,6 @@ function parseId(idParam: string) {
     return null;
   }
   return id;
-}
-
-function sameArray(a: string[] | undefined, b: string[] | undefined): boolean {
-  if (!a && !b) {
-    return true;
-  }
-  if (!a || !b) {
-    return false;
-  }
-  if (a.length !== b.length) {
-    return false;
-  }
-
-  for (let i = 0; i < a.length; i += 1) {
-    if (a[i] !== b[i]) {
-      return false;
-    }
-  }
-
-  return true;
 }
 
 export async function POST(
@@ -66,7 +65,6 @@ export async function POST(
     durationMinutes: record.durationMinutes,
     notes: record.notes,
     tags: record.tags,
-    originalWork: record.originalWork,
     cast: record.cast,
     castAliases: record.castAliases,
     summary: record.summary,
@@ -82,44 +80,17 @@ export async function POST(
   });
 
   const patch: Partial<CreateAnimeDTO> = {};
+  const metadataPatch = buildMetadataPatch(record, enriched, {
+    fields: DEFAULT_METADATA_FIELDS,
+    allowCastAliasAugment: true,
+    allowIsFinishedUpgrade: true,
+  }).patch;
 
   if (enriched.title && enriched.title !== record.title) {
     patch.title = enriched.title;
   }
 
-  if (enriched.coverUrl && enriched.coverUrl !== record.coverUrl) {
-    patch.coverUrl = enriched.coverUrl;
-  }
-  if (enriched.originalTitle && enriched.originalTitle !== record.originalTitle) {
-    patch.originalTitle = enriched.originalTitle;
-  }
-  if (enriched.totalEpisodes && enriched.totalEpisodes !== record.totalEpisodes) {
-    patch.totalEpisodes = enriched.totalEpisodes;
-  }
-  if (enriched.durationMinutes && enriched.durationMinutes !== record.durationMinutes) {
-    patch.durationMinutes = enriched.durationMinutes;
-  }
-  if (enriched.score && enriched.score !== record.score) {
-    patch.score = enriched.score;
-  }
-  if (enriched.summary && enriched.summary !== record.summary) {
-    patch.summary = enriched.summary;
-  }
-  if (enriched.originalWork && enriched.originalWork !== record.originalWork) {
-    patch.originalWork = enriched.originalWork;
-  }
-  if (Array.isArray(enriched.tags) && enriched.tags.length > 0 && !sameArray(enriched.tags, record.tags)) {
-    patch.tags = enriched.tags;
-  }
-  if (Array.isArray(enriched.cast) && enriched.cast.length > 0 && !sameArray(enriched.cast, record.cast)) {
-    patch.cast = enriched.cast;
-  }
-  if (Array.isArray(enriched.castAliases) && enriched.castAliases.length > 0 && !sameArray(enriched.castAliases, record.castAliases)) {
-    patch.castAliases = enriched.castAliases;
-  }
-  if (enriched.isFinished !== undefined && enriched.isFinished !== record.isFinished) {
-    patch.isFinished = enriched.isFinished;
-  }
+  Object.assign(patch, metadataPatch);
 
   const appliedFields = Object.keys(patch);
   if (appliedFields.length === 0) {

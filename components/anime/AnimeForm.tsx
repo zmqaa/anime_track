@@ -3,13 +3,7 @@
 import { fetchAnimeMetadata } from '@/lib/anime-provider';
 import { useState } from 'react';
 import type { AnimeStatus, AnimeFormInitialData } from '@/lib/anime-shared';
-
-const statusMap: Record<AnimeStatus, string> = {
-  watching: '追番中',
-  completed: '已看完',
-  dropped: '已弃坑',
-  plan_to_watch: '计划看',
-};
+import { statusLabels } from '@/lib/dashboard-types';
 
 interface AnimeFormProps {
   editingId: number | null;
@@ -186,7 +180,7 @@ export default function AnimeForm({
                         value={status} onChange={e => setStatus(e.target.value as AnimeStatus)}
                         className="w-full bg-zinc-950 border border-white/5 rounded-lg px-3 py-2.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 focus:outline-none transition appearance-none text-white"
                     >
-                        {Object.entries(statusMap).map(([k, v]) => (
+                        {Object.entries(statusLabels).map(([k, v]) => (
                         <option key={k} value={k}>{v}</option>
                         ))}
                     </select>

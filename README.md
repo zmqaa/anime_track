@@ -118,8 +118,8 @@ npm run anime:backfill-metadata
 # 写入数据库
 npm run anime:backfill-metadata:write
 
-# 只补评分、首播、原作并关闭 AI
-node scripts/maintenance/backfill_anime_metadata.js --write --no-ai --fields=score,premiereDate,originalWork
+# 只补评分、首播、总集数并关闭 AI
+node scripts/maintenance/backfill_anime_metadata.js --write --no-ai --fields=score,premiereDate,totalEpisodes
 
 # 仅处理前 30 条，控制速率
 node scripts/maintenance/backfill_anime_metadata.js --write --limit=30 --delay=1200

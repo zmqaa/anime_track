@@ -5,11 +5,16 @@ export interface AnimeMetadata {
     originalTitle?: string;
     score?: number;
     description?: string;
-    originalWork?: string;
+    premiereDate?: string;
     cast?: string[];
     castAliases?: string[];
     isFinished?: boolean;
 }
+
+const providerSource = require('./metadata/provider-source.js') as {
+    fetchAnimeMetadata: (title: string) => Promise<AnimeMetadata | null>;
+    fetchAnimeMetadataByQueries: (...queries: Array<string | undefined | null>) => Promise<AnimeMetadata | null>;
+};
 
 interface BangumiImages {
     large?: string;
@@ -64,7 +69,9 @@ interface JikanAnime {
     score?: number;
     title_japanese?: string;
     airing?: boolean;
-    source?: string;
+    aired?: {
+        from?: string;
+    };
 }
 
 interface JikanSearchResponse {
@@ -95,6 +102,31 @@ function uniqueValues(values: Array<string | undefined | null>): string[] {
     }
 
     return result;
+}
+
+function normalizeDate(value: string | undefined): string | undefined {
+    if (!value) {
+        return undefined;
+    }
+
+    const trimmed = value.trim();
+    if (!trimmed) {
+        return undefined;
+    }
+
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+        return trimmed;
+    }
+
+    const parsed = new Date(trimmed);
+    if (Number.isNaN(parsed.getTime())) {
+        return undefined;
+    }
+
+    const year = parsed.getFullYear();
+    const month = String(parsed.getMonth() + 1).padStart(2, '0');
+    const day = String(parsed.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
 
 function pickBangumiSubject(subjects: BangumiSubject[], title: string) {
@@ -215,121 +247,10 @@ async function fetchJikanCast(malId: number): Promise<string[]> {
 }
 
 export async function fetchAnimeMetadata(title: string): Promise<AnimeMetadata | null> {
-    if (!title) return null;
-
-    const result: AnimeMetadata = {};
-    let found = false;
-    let bangumiSubject: BangumiSubject | null = null;
-
-    console.log(`[AnimeProvider] Searching metadata for: ${title}`);
-
-    // Strategy 1: Bangumi (bgm.tv)
-    try {
-        bangumiSubject = await fetchBangumiSubject(title);
-
-        if (bangumiSubject) {
-            if (bangumiSubject.images) {
-                const bgmCover = bangumiSubject.images.large || bangumiSubject.images.common || bangumiSubject.images.medium;
-                if (bgmCover) {
-                    result.coverUrl = bgmCover.replace('http://', 'https://');
-                }
-            }
-
-            if (bangumiSubject.name_cn) {
-                result.title = bangumiSubject.name_cn;
-            }
-
-            if (bangumiSubject.name) {
-                result.originalTitle = bangumiSubject.name;
-            }
-
-            if (bangumiSubject.id) {
-                const bangumiCast = await fetchBangumiCast(Number(bangumiSubject.id));
-                if (bangumiCast.length > 0) {
-                    result.cast = bangumiCast;
-                    result.castAliases = bangumiCast;
-                }
-            }
-
-            found = true;
-        }
-    } catch (e) {
-        console.error('Bangumi search failed', e);
-    }
-
-    // Strategy 2: Jikan (MyAnimeList) - Fallback or supplementary
-    // Try Jikan if we miss key info (Cover OR Episodes OR Description)
-    // Always Try Jikan for episodes/summary if missing, as Bangumi simple search lacks deep data
-    if (!result.coverUrl || !result.totalEpisodes || !result.description || !result.cast || result.cast.length === 0 || !result.originalWork) {
-        try {
-            const anime = await fetchJikanSearch(title);
-
-            if (anime) {
-                    // Cover
-                    if (!result.coverUrl) {
-                        const imageUrl = anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url;
-                        if (imageUrl) {
-                            result.coverUrl = imageUrl;
-                        }
-                    }
-
-                    // Episodes
-                    if (!result.totalEpisodes && anime.episodes) {
-                        result.totalEpisodes = anime.episodes;
-                    }
-
-                    // Description / Synopsis
-                    if (!result.description && anime.synopsis) {
-                        result.description = anime.synopsis;
-                    }
-                    
-                    // Score
-                    if (!result.score && anime.score) {
-                        result.score = anime.score;
-                    }
-                    
-                    if (anime.title_japanese) {
-                        result.originalTitle = anime.title_japanese;
-                    }
-
-                    // Airing status
-                    if (anime.airing !== undefined) {
-                        result.isFinished = !anime.airing;
-                    }
-
-                    // Original Work / Source
-                    if (anime.source) {
-                        result.originalWork = anime.source;
-                    }
-
-                    if ((!result.cast || result.cast.length === 0) && anime.mal_id) {
-                        const jikanCast = await fetchJikanCast(Number(anime.mal_id));
-                        if (jikanCast.length > 0) {
-                            result.cast = jikanCast;
-                            result.castAliases = jikanCast;
-                        }
-                    }
-
-                    found = true;
-            }
-        } catch (e) {
-            console.error('Jikan search failed', e);
-        }
-    }
-    
-    return found ? result : null;
+    return providerSource.fetchAnimeMetadata(title);
 }
 
 export async function fetchAnimeMetadataByQueries(...queries: Array<string | undefined | null>): Promise<AnimeMetadata | null> {
-    const dedupedQueries = uniqueValues(queries);
-
-    for (const query of dedupedQueries) {
-        const metadata = await fetchAnimeMetadata(query);
-        if (metadata) {
-            return metadata;
-        }
-    }
-
-    return null;
+    return providerSource.fetchAnimeMetadataByQueries(...queries);
 }
 

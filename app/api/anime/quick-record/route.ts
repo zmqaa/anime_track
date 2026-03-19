@@ -3,160 +3,168 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { createAnimeRecord, findAnimeByTitle, getAnimeRecord, updateAnimeRecord, CreateAnimeDTO, listAnimeRecordsByExactTitle, AnimeRecord } from '@/lib/anime';
 import { addBatchWatchHistory, addWatchHistory } from '@/lib/history';
-import { parseWatchInput } from '@/lib/ai';
+import { parseQuickRecordBatch, type ParsedQuickRecordIntent } from '@/lib/ai';
 import { enrichAnimeInput } from '@/lib/anime-enrichment';
-import { uniqueStrings } from '@/lib/anime-cast';
+import {
+  detectRewatchTag, resolveNextRewatchTag, shouldAutoResolveRewatch,
+  normalizeDate, resolveRecordedDateString, resolveIntentStatus, resolveTargetProgress,
+  mergeStringArrays, sameStringArray, hasPatchChanges, buildRecognition,
+} from './_helpers';
 
-type SessionUser = {
-  role?: string;
+type SessionUser = { role?: string };
+
+type QuickRecordResult = {
+  created: boolean;
+  replay: boolean;
+  rewatchTag?: string;
+  historyWritten: boolean;
+  parsed: ParsedQuickRecordIntent;
+  recognition: ReturnType<typeof buildRecognition>;
+  entry: AnimeRecord;
 };
 
-function parseRewatchCountToken(token: string): number | undefined {
-  const normalized = token.trim();
-  if (!normalized) {
-    return undefined;
-  }
-
-  if (/^\d+$/.test(normalized)) {
-    const parsed = Number(normalized);
-    return Number.isFinite(parsed) && parsed >= 2 ? parsed : undefined;
-  }
-
-  const digitMap: Record<string, number> = {
-    '零': 0,
-    '〇': 0,
-    '一': 1,
-    '二': 2,
-    '两': 2,
-    '三': 3,
-    '四': 4,
-    '五': 5,
-    '六': 6,
-    '七': 7,
-    '八': 8,
-    '九': 9,
+async function processQuickRecordIntent(
+  parsedInput: ParsedQuickRecordIntent,
+  options: { rawText: string; manualRewatchTag?: string; forceRewatch?: boolean },
+): Promise<QuickRecordResult> {
+  const parsed: ParsedQuickRecordIntent = {
+    ...parsedInput,
+    animeTitle: parsedInput.animeTitle.trim(),
+    premiereDate: undefined,
   };
 
-  let value = 0;
-  let current = 0;
+  const recordedDateString = resolveRecordedDateString(parsed);
+  const watchedAt = normalizeDate(recordedDateString);
+  let rewatchTag = parsed.rewatchTag || options.manualRewatchTag || detectRewatchTag(options.rawText) || (options.forceRewatch ? '二刷' : undefined);
 
-  for (const char of normalized) {
-    if (digitMap[char] !== undefined) {
-      current = digitMap[char];
-      continue;
+  const anime = await findAnimeByTitle(parsed.animeTitle);
+  const sameTitleRecords = anime ? await listAnimeRecordsByExactTitle(anime.title) : [];
+
+  if (!rewatchTag && anime && shouldAutoResolveRewatch(parsed, anime)) {
+    rewatchTag = resolveNextRewatchTag(sameTitleRecords);
+  }
+
+  const forceCreateDuplicate = Boolean(rewatchTag);
+
+  // ── 新建 ──
+  if (!anime || forceCreateDuplicate) {
+    let input: CreateAnimeDTO = {
+      title: anime?.title || parsed.animeTitle,
+      originalTitle: parsed.originalTitle || anime?.originalTitle,
+      coverUrl: parsed.coverUrl || anime?.coverUrl,
+      status: parsed.status || 'watching',
+      score: parsed.score ?? anime?.score,
+      progress: 0,
+      totalEpisodes: parsed.totalEpisodes || anime?.totalEpisodes,
+      durationMinutes: parsed.durationMinutes || anime?.durationMinutes,
+      notes: parsed.notes || anime?.notes,
+      tags: mergeStringArrays(anime?.tags, parsed.tags),
+      cast: parsed.cast && parsed.cast.length > 0 ? parsed.cast : anime?.cast,
+      castAliases: mergeStringArrays(anime?.castAliases, parsed.castAliases, parsed.cast),
+      summary: parsed.summary || anime?.summary,
+      startDate: parsed.startDate,
+      endDate: parsed.endDate,
+      premiereDate: anime?.premiereDate,
+      isFinished: parsed.isFinished ?? anime?.isFinished,
+    };
+
+    if (!anime) {
+      input = await enrichAnimeInput(input, { mode: 'create', originalUserTitle: parsed.animeTitle });
     }
 
-    if (char === '十') {
-      value += (current || 1) * 10;
-      current = 0;
-      continue;
+    if (rewatchTag) {
+      input.tags = mergeStringArrays(input.tags, [rewatchTag]);
     }
 
-    return undefined;
+    const targetProgress = resolveTargetProgress(parsed, 0, input.totalEpisodes);
+    input.progress = targetProgress;
+    input.status = resolveIntentStatus(parsed, targetProgress);
+
+    if (input.status === 'completed' && input.totalEpisodes) {
+      input.progress = input.totalEpisodes;
+    }
+    if (!input.startDate && input.progress > 0 && input.status !== 'plan_to_watch' && recordedDateString) {
+      input.startDate = recordedDateString;
+    }
+    if ((input.status === 'completed' || (input.totalEpisodes && input.progress >= input.totalEpisodes)) && !input.endDate && recordedDateString) {
+      input.endDate = recordedDateString;
+      input.status = 'completed';
+    }
+
+    const created = await createAnimeRecord(input);
+    const shouldWriteHistory = Boolean(recordedDateString) && created.progress > 0 && created.status !== 'plan_to_watch';
+    if (shouldWriteHistory) {
+      await addWatchHistory(created.id, created.title, created.progress, watchedAt);
+    }
+
+    const entry = (await getAnimeRecord(created.id)) || created;
+    return {
+      created: true, replay: false, rewatchTag, historyWritten: shouldWriteHistory, parsed,
+      recognition: buildRecognition(parsed, entry, entry.progress, !anime, shouldWriteHistory, recordedDateString, entry.status),
+      entry,
+    };
   }
 
-  value += current;
-  return value >= 2 ? value : undefined;
-}
+  // ── 更新已有作品 ──
+  const effectiveTotalEpisodes = parsed.totalEpisodes || anime.totalEpisodes;
+  const targetProgress = resolveTargetProgress(parsed, anime.progress, effectiveTotalEpisodes);
+  const mergedTags = mergeStringArrays(anime.tags, parsed.tags, rewatchTag ? [rewatchTag] : undefined);
+  const mergedCastAliases = mergeStringArrays(anime.castAliases, parsed.castAliases, parsed.cast);
+  const patch: Partial<CreateAnimeDTO> = {};
 
-function detectRewatchTag(text: string): string | undefined {
-  const compact = text.replace(/\s+/g, '');
-  if (!compact) {
-    return undefined;
+  if (parsed.originalTitle && !anime.originalTitle) patch.originalTitle = parsed.originalTitle;
+  if (parsed.score !== undefined && anime.score === undefined) patch.score = parsed.score;
+  if (parsed.totalEpisodes && !anime.totalEpisodes) patch.totalEpisodes = parsed.totalEpisodes;
+  if (parsed.durationMinutes && !anime.durationMinutes) patch.durationMinutes = parsed.durationMinutes;
+  if (parsed.notes && !anime.notes) patch.notes = parsed.notes;
+  if (parsed.summary && !anime.summary) patch.summary = parsed.summary;
+  if (parsed.coverUrl && !anime.coverUrl) patch.coverUrl = parsed.coverUrl;
+  if (parsed.cast && parsed.cast.length > 0 && (!anime.cast || anime.cast.length === 0)) patch.cast = parsed.cast;
+  if (!sameStringArray(mergedTags, anime.tags)) patch.tags = mergedTags;
+  if (!sameStringArray(mergedCastAliases, anime.castAliases)) patch.castAliases = mergedCastAliases;
+  if (parsed.isFinished !== undefined && anime.isFinished === undefined) patch.isFinished = parsed.isFinished;
+  if (targetProgress > anime.progress) patch.progress = targetProgress;
+
+  const resolvedStatus = parsed.status || ((effectiveTotalEpisodes && targetProgress >= effectiveTotalEpisodes) ? 'completed' : undefined);
+  if (resolvedStatus && resolvedStatus !== anime.status) patch.status = resolvedStatus;
+
+  if (!anime.startDate && parsed.startDate) {
+    patch.startDate = parsed.startDate;
+  } else if (!anime.startDate && targetProgress > 0 && recordedDateString && !parsed.isHistorical) {
+    patch.startDate = recordedDateString;
   }
 
-  const countToken = compact.match(/([0-9]{1,3}|[一二两三四五六七八九十]+)\s*刷/i)?.[1];
-  if (countToken) {
-    const count = parseRewatchCountToken(countToken);
-    if (count && count >= 2) {
-      return `${count}刷`;
+  if (parsed.endDate && parsed.endDate !== anime.endDate) {
+    patch.endDate = parsed.endDate;
+  } else if ((resolvedStatus === 'completed' || (effectiveTotalEpisodes && targetProgress >= effectiveTotalEpisodes)) && !anime.endDate && recordedDateString) {
+    patch.endDate = recordedDateString;
+  }
+
+  let entry = anime;
+  if (hasPatchChanges(patch)) {
+    const updated = await updateAnimeRecord(anime.id, patch);
+    if (!updated) throw new Error('更新失败');
+    entry = updated;
+  }
+
+  let historyWritten = false;
+  const shouldWriteHistory = Boolean(recordedDateString) && targetProgress > 0;
+  if (shouldWriteHistory) {
+    if (targetProgress > anime.progress) {
+      await addBatchWatchHistory(entry.id, entry.title, anime.progress + 1, targetProgress, watchedAt);
+      historyWritten = true;
+    } else if (parsed.episode !== undefined || parsed.progress !== undefined || parsed.status === 'watching' || parsed.status === 'completed') {
+      await addWatchHistory(entry.id, entry.title, targetProgress, watchedAt);
+      historyWritten = true;
     }
   }
 
-  if (/二周目|重刷|重温|再刷/i.test(compact)) {
-    return '二刷';
-  }
-
-  return undefined;
-}
-
-function parseRewatchTagCount(tag: string): number | undefined {
-  const normalized = tag.trim();
-  if (!normalized) {
-    return undefined;
-  }
-
-  const match = normalized.match(/^([0-9]{1,3}|[一二两三四五六七八九十]+)刷$/i);
-  if (!match) {
-    return undefined;
-  }
-
-  return parseRewatchCountToken(match[1]);
-}
-
-function formatRewatchTag(count: number): string {
-  const cjkMap: Record<number, string> = {
-    2: '二',
-    3: '三',
-    4: '四',
-    5: '五',
-    6: '六',
-    7: '七',
-    8: '八',
-    9: '九',
-    10: '十',
+  const finalEntry = (await getAnimeRecord(entry.id)) || entry;
+  return {
+    created: false, replay: historyWritten && targetProgress <= anime.progress, rewatchTag, historyWritten, parsed,
+    recognition: buildRecognition(parsed, finalEntry, finalEntry.progress, false, historyWritten, recordedDateString, finalEntry.status),
+    entry: finalEntry,
   };
-
-  return cjkMap[count] ? `${cjkMap[count]}刷` : `${count}刷`;
-}
-
-function resolveNextRewatchTag(records: Pick<AnimeRecord, 'tags'>[]): string {
-  let highestCount = 1;
-
-  for (const record of records) {
-    if (!Array.isArray(record.tags)) {
-      continue;
-    }
-
-    for (const tag of record.tags) {
-      const parsed = parseRewatchTagCount(tag);
-      if (parsed && parsed > highestCount) {
-        highestCount = parsed;
-      }
-    }
-  }
-
-  const baselineCount = Math.max(records.length, 1);
-  const nextCount = Math.max(2, highestCount + 1, baselineCount + 1);
-  return formatRewatchTag(nextCount);
-}
-
-function normalizeDate(value: string | undefined): Date | undefined {
-  if (!value) {
-    return undefined;
-  }
-
-  const parsed = new Date(`${value}T12:00:00`);
-  if (Number.isNaN(parsed.getTime())) {
-    return undefined;
-  }
-
-  return parsed;
-}
-
-function toDateString(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
-
-function resolveTargetEpisode(parsedEpisode: number | undefined, currentProgress: number): number {
-  if (parsedEpisode && parsedEpisode > 0) {
-    return parsedEpisode;
-  }
-
-  return Math.max(1, currentProgress + 1);
 }
 
 export async function POST(request: NextRequest) {
@@ -168,136 +176,45 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const text = typeof body?.text === 'string' ? body.text.trim() : '';
-
     if (!text) {
       return NextResponse.json({ error: '请输入一句话记录' }, { status: 400 });
     }
 
-    const parsed = await parseWatchInput(text);
-    if (!parsed?.animeTitle) {
+    const parsedBatch = await parseQuickRecordBatch(text);
+    if (!Array.isArray(parsedBatch.records) || parsedBatch.records.length === 0) {
       return NextResponse.json({ error: '未能识别番剧名称，请换一种说法' }, { status: 400 });
     }
 
     const manualRewatchTag = typeof body?.rewatchTag === 'string' ? body.rewatchTag.trim() : '';
-    const detectedRewatchTag = detectRewatchTag(text);
-    let rewatchTag = detectedRewatchTag || manualRewatchTag || (body?.forceRewatch ? '二刷' : undefined);
+    const results: QuickRecordResult[] = [];
+    const errors: Array<{ title: string; error: string }> = [];
 
-    const watchedAt = normalizeDate(parsed.watchedAt);
-    const watchedAtDateString = parsed.watchedAt || toDateString(new Date());
-
-    const anime = await findAnimeByTitle(parsed.animeTitle);
-    const sameTitleRecords = anime ? await listAnimeRecordsByExactTitle(anime.title) : [];
-
-    // Auto infer rewatch when user records EP1 again on a completed series.
-    if (!rewatchTag && anime && parsed.episode === 1) {
-      const finishedByProgress = Boolean(anime.totalEpisodes) && anime.progress >= Number(anime.totalEpisodes);
-      const finishedByStatus = anime.status === 'completed';
-      if (finishedByProgress || finishedByStatus) {
-        rewatchTag = resolveNextRewatchTag(sameTitleRecords);
+    for (const parsed of parsedBatch.records) {
+      try {
+        results.push(await processQuickRecordIntent(parsed, { rawText: text, manualRewatchTag, forceRewatch: Boolean(body?.forceRewatch) }));
+      } catch (error) {
+        errors.push({ title: parsed.animeTitle, error: error instanceof Error ? error.message : '处理失败' });
       }
     }
 
-    const forceCreateDuplicate = Boolean(rewatchTag);
-
-    if (!anime || forceCreateDuplicate) {
-      let input: CreateAnimeDTO = {
-        title: anime?.title || parsed.animeTitle,
-        originalTitle: parsed.originalTitle || anime?.originalTitle,
-        coverUrl: anime?.coverUrl,
-        status: 'watching',
-        progress: 0,
-        totalEpisodes: anime?.totalEpisodes,
-        durationMinutes: anime?.durationMinutes,
-        notes: anime?.notes,
-        tags: anime?.tags,
-        originalWork: anime?.originalWork,
-        cast: anime?.cast,
-        castAliases: anime?.castAliases,
-        summary: anime?.summary,
-        premiereDate: anime?.premiereDate,
-        isFinished: anime?.isFinished,
-      };
-
-      if (!anime) {
-        input = await enrichAnimeInput(input, {
-          mode: 'create',
-          originalUserTitle: parsed.animeTitle,
-        });
-      }
-
-      if (rewatchTag) {
-        input.tags = uniqueStrings([...(input.tags || []), rewatchTag]);
-      }
-
-      const targetEpisode = resolveTargetEpisode(parsed.episode, 0);
-      input.progress = targetEpisode;
-
-      if (!input.startDate) {
-        input.startDate = watchedAtDateString;
-      }
-
-      if (input.totalEpisodes && input.progress >= input.totalEpisodes) {
-        input.status = 'completed';
-        if (!input.endDate) {
-          input.endDate = watchedAtDateString;
-        }
-      }
-
-      const created = await createAnimeRecord(input);
-      await addWatchHistory(created.id, created.title, targetEpisode, watchedAt);
-
-      const refreshed = await getAnimeRecord(created.id);
-      return NextResponse.json({
-        ok: true,
-        created: true,
-        rewatchTag,
-        parsed,
-        entry: refreshed || created,
-      });
+    if (results.length === 0) {
+      return NextResponse.json({ error: errors[0]?.error || 'AI 录入失败', errors }, { status: 500 });
     }
 
-    const targetEpisode = resolveTargetEpisode(parsed.episode, anime.progress);
-
-    if (targetEpisode > anime.progress) {
-      const patch: Partial<CreateAnimeDTO> = {
-        progress: targetEpisode,
-      };
-
-      if (anime.totalEpisodes && targetEpisode >= anime.totalEpisodes) {
-        patch.status = 'completed';
-        if (!anime.endDate) {
-          patch.endDate = watchedAtDateString;
-        }
-      }
-
-      const updated = await updateAnimeRecord(anime.id, patch);
-      if (!updated) {
-        return NextResponse.json({ error: '更新失败' }, { status: 500 });
-      }
-
-      await addBatchWatchHistory(updated.id, updated.title, anime.progress + 1, targetEpisode, watchedAt);
-
-      return NextResponse.json({
-        ok: true,
-        created: false,
-        parsed,
-        entry: updated,
-      });
-    }
-
-    await addWatchHistory(anime.id, anime.title, targetEpisode, watchedAt);
-    const latest = await getAnimeRecord(anime.id);
-
+    const first = results[0];
     return NextResponse.json({
       ok: true,
-      created: false,
-      replay: true,
-      parsed,
-      entry: latest || anime,
+      count: results.length,
+      createdCount: results.filter((r) => r.created).length,
+      updatedCount: results.filter((r) => !r.created && !r.replay).length,
+      replayCount: results.filter((r) => r.replay).length,
+      historySkippedCount: results.filter((r) => !r.historyWritten).length,
+      results, errors,
+      created: first.created, replay: first.replay, rewatchTag: first.rewatchTag,
+      parsed: first.parsed, recognition: first.recognition, entry: first.entry,
     });
   } catch (error: unknown) {
     console.error('Quick record error:', error);
-    const message = error instanceof Error ? error.message : 'AI 录入失败';
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'AI 录入失败' }, { status: 500 });
   }
 }
