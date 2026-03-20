@@ -12,6 +12,7 @@
     "db:apply-sql": "node scripts/maintenance/apply_sql_files.js",
     "db:init-with-anime-data": "node scripts/maintenance/apply_sql_files.js database/schema.sql database/seed_anime_data.sql",
     "db:export-anime-seed": "node scripts/maintenance/export_anime_seed.js",
+    "db:full-backup": "node scripts/maintenance/export_full_backup.js",
     "anime:backfill-metadata": "node scripts/maintenance/backfill_anime_metadata.js",
     "anime:backfill-metadata:write": "node scripts/maintenance/backfill_anime_metadata.js --write",
     "anime:backfill-premiere-date": "node scripts/maintenance/backfill_premiere_date.js",
